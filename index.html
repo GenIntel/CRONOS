@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRONOS: Benchmarking Counterfactual Physical Consistency in Video Models</title>
+  <meta name="description" content="CRONOS is an intervention-based benchmark for evaluating counterfactual physical consistency in video generation models." />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="CRONOS: Benchmarking Counterfactual Physical Consistency in Video Models" />
+  <meta property="og:description" content="An intervention-based benchmark for evaluating counterfactual physical consistency in video generation models." />
+  <meta property="og:image" content="assets/images/teaser.png" />
+  <meta property="og:type" content="website" />
+
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ============== HEADER / HERO ============== -->
+  <header class="hero">
+    <div class="container">
+      <div class="venue-badge">Submission Under Review</div>
+      <h1 class="paper-title">
+        CRONOS: Benchmarking Counterfactual<br>
+        Physical Consistency in Video Models
+      </h1>
+
+      <div class="authors">
+        <span class="author">León Begiristain<sup>1</sup></span>
+        <span class="author">Olaf Dünkel<sup>2</sup></span>
+        <span class="author">Adam Kortylewski<sup>3</sup></span>
+      </div>
+      <div class="affiliations">
+        <span><sup>1</sup>University of Freiburg</span>
+        <span><sup>2</sup>Max Planck Institute for Informatics</span>
+        <span><sup>3</sup>CISPA Helmholtz Center for Information Security</span>
+      </div>
+
+      <!-- Action buttons -->
+      <nav class="action-buttons">
+        <a class="btn" href="#" target="_blank" rel="noopener">
+          <span class="btn-icon">📄</span> Paper
+        </a>
+        <a class="btn" href="#" target="_blank" rel="noopener">
+          <span class="btn-icon">💻</span> Code
+        </a>
+        <a class="btn" href="#" target="_blank" rel="noopener">
+          <span class="btn-icon">🎬</span> Dataset
+        </a>
+        <a class="btn" href="#bibtex">
+          <span class="btn-icon">📚</span> BibTeX
+        </a>
+      </nav>
+
+      <!-- ============ TEASER VIDEO PLACEHOLDER ============ -->
+      <div class="teaser-media">
+        <!-- TODO: Replace this placeholder with the main teaser video -->
+        <!--
+        <video autoplay muted loop playsinline poster="assets/images/teaser_poster.jpg">
+          <source src="assets/videos/teaser.mp4" type="video/mp4">
+        </video>
+        -->
+        <div class="media-placeholder media-placeholder--video">
+          <div class="placeholder-label">
+            <span class="placeholder-icon">🎥</span>
+            <span class="placeholder-text">Teaser Video</span>
+            <span class="placeholder-hint">Replace with <code>assets/videos/teaser.mp4</code></span>
+          </div>
+        </div>
+      </div>
+
+      <p class="teaser-caption">
+        CRONOS evaluates whether video models produce predictions of physical events that remain coherent
+        under controlled interventions in <strong>camera viewpoint</strong>, <strong>scene</strong>,
+        <strong>object appearance</strong>, and <strong>object category</strong>.
+      </p>
+    </div>
+  </header>
+
+  <!-- ============== ABSTRACT ============== -->
+  <section class="section" id="abstract">
+    <div class="container narrow">
+      <h2>Abstract</h2>
+      <p>
+        Video prediction is increasingly viewed as a path toward generalizable world models, yet it
+        remains unclear whether these systems learn underlying causal structure or merely exploit
+        superficial visual correlations for future prediction. We introduce <strong>CRONOS</strong>,
+        an intervention-based benchmark designed to evaluate <em>counterfactual physical consistency</em>:
+        whether a model's predictions of physical events respond appropriately to controlled changes
+        in the visual input, such as variations of scene context, viewpoint, object appearance, and
+        object category. Built in a photorealistic Unreal Engine environment, CRONOS enables
+        controlled, high-fidelity generation of videos across diverse scenes and dynamics. Unlike
+        prior benchmarks that evaluate video prediction on fixed scenes, CRONOS systematically
+        intervenes on four key factors while keeping the underlying physical event — such as a
+        collision, occlusion, or fall — fixed.
+      </p>
+      <p>
+        Our evaluation of recent open-source video generators reveals <strong>substantial failures
+        in counterfactual physical consistency</strong>: prediction quality for the same physical
+        event is affected by appearance, environment, and particularly by viewpoint changes. CRONOS
+        provides a principled and reproducible testbed for diagnosing how generated video quality
+        changes across interventions, establishing a concrete target for developing models that
+        perform consistently across changes of multiple conditions.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============== KEY IDEA / DEFINITION CALLOUT ============== -->
+  <section class="section section--accent">
+    <div class="container narrow">
+      <div class="definition-card">
+        <div class="definition-label">Core Concept</div>
+        <h3 class="definition-title">Counterfactual Physical Consistency</h3>
+        <p class="definition-body">
+          A model's ability to produce predictions of physical events that remain coherent across
+          counterfactual variants of the visual input — stable under nuisance interventions
+          (e.g., viewpoint, appearance) and coherent under structured ones (e.g., object swaps).
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== METHOD / DESIGN ============== -->
+  <section class="section" id="method">
+    <div class="container">
+      <h2>The CRONOS Benchmark</h2>
+      <p class="lead">
+        CRONOS frames video model evaluation as a controlled <strong>counterfactual experiment</strong>.
+        Each physical event is rendered into multiple counterfactual observations by intervening on
+        one scene factor at a time while holding all others fixed.
+      </p>
+
+      <!-- ============ FIGURE 1: PIPELINE / OVERVIEW ============ -->
+      <figure class="figure">
+        <img src="assets/images/pipeline.png" alt="CRONOS benchmark overview: counterfactual interventions on viewpoint, scene, appearance, and object category." class="figure-image" />
+        <figcaption>
+          <strong>Figure 1.</strong> The CRONOS benchmark systematically intervenes on visual factors
+          while preserving the underlying physical event, isolating each axis of model sensitivity.
+        </figcaption>
+      </figure>
+
+      <!-- =============== THREE PHYSICAL EVENTS =============== -->
+      <h3>Physical Events</h3>
+      <p>
+        We span three fundamental rigid-body interactions, chosen to isolate distinct aspects of
+        physical reasoning.
+      </p>
+
+      <div class="event-grid">
+        <div class="event-card">
+          <div class="event-media">
+            <video autoplay muted loop playsinline class="figure-image"><source src="assets/videos/event_fall.mp4" type="video/mp4"></video>
+          </div>
+          <h4>Fall (roll-to-drop)</h4>
+          <p>An object rolls across a surface and falls from an edge — testing prediction across
+            changing contact conditions and free-fall motion.</p>
+        </div>
+
+        <div class="event-card">
+          <div class="event-media">
+            <video autoplay muted loop playsinline class="figure-image"><source src="assets/videos/event_collision.mp4" type="video/mp4"></video>
+          </div>
+          <h4>Collision</h4>
+          <p>One object impacts another — testing whether generated videos preserve plausible
+            interaction dynamics, temporal/spatial coherence, and object permanence.</p>
+        </div>
+
+        <div class="event-card">
+          <div class="event-media">
+            <video autoplay muted loop playsinline class="figure-image"><source src="assets/videos/event_occlusion.mp4" type="video/mp4"></video>
+          </div>
+          <h4>Occlusion</h4>
+          <p>An object becomes fully occluded behind a scene element and later reappears —
+            probing long-range temporal coherence and inference of hidden motion.</p>
+        </div>
+      </div>
+
+      <!-- =============== FOUR INTERVENTIONS =============== -->
+      <h3>Systematic Visual Interventions</h3>
+      <p>
+        For each event, CRONOS applies one intervention at a time while holding the remaining
+        variables fixed. This isolates model sensitivity to a single factor.
+      </p>
+
+      <!-- Compact list of the four interventions -->
+      <ul class="intervention-list">
+        <li class="intervention-item">
+          <span class="intervention-icon">📷</span>
+          <div class="intervention-body">
+            <div class="intervention-head">
+              <span class="intervention-name">Camera Viewpoint</span>
+              <span class="intervention-tag tag-nuisance">Nuisance</span>
+            </div>
+            <p>The rendering viewpoint is changed while all other factors are preserved.
+              Probes whether models disentangle scene geometry from observed motion.</p>
+          </div>
+        </li>
+        <li class="intervention-item">
+          <span class="intervention-icon">🎨</span>
+          <div class="intervention-body">
+            <div class="intervention-head">
+              <span class="intervention-name">Object Appearance</span>
+              <span class="intervention-tag tag-nuisance">Nuisance</span>
+            </div>
+            <p>Visual attributes (e.g., color) are changed without altering physical parameters —
+              isolating whether models disentangle appearance from dynamics.</p>
+          </div>
+        </li>
+        <li class="intervention-item">
+          <span class="intervention-icon">🏞️</span>
+          <div class="intervention-body">
+            <div class="intervention-head">
+              <span class="intervention-name">Scene</span>
+              <span class="intervention-tag tag-structured">Structured</span>
+            </div>
+            <p>Background environment and lighting change while event dynamics are preserved —
+              tests robustness to contextual variation that alters visual statistics.</p>
+          </div>
+        </li>
+        <li class="intervention-item">
+          <span class="intervention-icon">📦</span>
+          <div class="intervention-body">
+            <div class="intervention-head">
+              <span class="intervention-name">Object Category</span>
+              <span class="intervention-tag tag-structured">Structured</span>
+            </div>
+            <p>The object of interest is replaced with another, changing both visual properties and
+              physical parameters (mass, friction). Probes generalization across instances.</p>
+          </div>
+        </li>
+      </ul>
+
+
+      <!-- =============== EVALUATION METRICS =============== -->
+      <h3>Evaluation Metrics</h3>
+      <p>
+        CRONOS decomposes generation quality into complementary per-video metrics, validated against
+        human ratings.
+      </p>
+
+      <div class="metric-list">
+        <div class="metric-item"><strong>Background Stability</strong> — perturbations in environment over time.</div>
+        <div class="metric-item"><strong>Appearance Stability</strong> — consistency of object appearance over time.</div>
+        <div class="metric-item"><strong>3D-Shape Stability</strong> — geometric consistency of objects throughout the video.</div>
+        <div class="metric-item"><strong>Motion Similarity</strong> — motion agreement with reference rendered video.</div>
+        <div class="metric-item"><strong>Physical Plausibility</strong> — VLM-as-judge (Qwen3-VL-32B) over physics-specific questions.</div>
+        <div class="metric-item"><strong>Success Rate</strong> — binary pass/fail aggregation with human-calibrated thresholds.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== KEY FINDINGS ============== -->
+  <section class="section section--findings" id="findings">
+    <div class="container">
+      <h2>Key Findings</h2>
+      <p class="lead">
+        We evaluate Cosmos2.5 (2B, 14B), CogVideoX1.5 (5B), MAGI-1 (4.5B), and Wan2.2 (14B)
+        across both I2V and V2V settings.
+      </p>
+
+      <div class="findings-grid">
+        <div class="finding-card">
+          <div class="finding-number">01</div>
+          <h3>Models fail at basic rigid-body physics</h3>
+          <p>
+            All evaluated open-source video models fail to reliably generate short clips of basic
+            rigid-body physics. Even the strongest model (<strong>Cosmos2.5-2B V2V</strong>) achieves
+            only a <strong>22% success rate</strong>, with most models below 5%.
+          </p>
+        </div>
+
+        <div class="finding-card">
+          <div class="finding-number">02</div>
+          <h3>No model is counterfactually consistent</h3>
+          <p>
+            Generation quality substantially shifts under every intervention — including superficial
+            appearance changes, and <strong>particularly under viewpoint, object-type, and scene
+            interventions</strong>. Models encode predictions in view-dependent ways.
+          </p>
+        </div>
+
+        <div class="finding-card">
+          <div class="finding-number">03</div>
+          <h3>Video conditioning helps beyond motion</h3>
+          <p>
+            V2V outperforms I2V not only on motion fidelity (as expected) but also on
+            <strong>background and object stability</strong>, suggesting additional conditioning
+            frames help form more stable internal representations at inference time.
+          </p>
+        </div>
+
+        <div class="finding-card">
+          <div class="finding-number">04</div>
+          <h3>Scaling alone is not enough</h3>
+          <p>
+            Scaling Cosmos from 2B to 14B parameters yields <strong>no improvement</strong> on
+            physical event generation. Model size alone does not guarantee better counterfactual
+            physical consistency.
+          </p>
+        </div>
+      </div>
+
+      <!-- ============ RESULTS FIGURE PLACEHOLDER ============ -->
+      <figure class="figure">
+        <img src="assets/images/sensitivities.png" alt="Sensitivities to counterfactual interventions." class="figure-image" />
+        <figcaption>
+          <strong>Figure 2.</strong> Sensitivity to counterfactual interventions averaged across
+          metrics. Lower is better. All models show substantial sensitivity across every intervention
+          type, including superficial appearance changes.
+        </figcaption>
+      </figure>
+
+      <!-- ============ BENCHMARK TABLE ============ -->
+      <h3>Benchmark Results</h3>
+      <p>Performance averaged across all videos. Metrics are normalized to [0, 1], higher is better.</p>
+
+      <div class="table-wrap">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>Mode</th>
+              <th>Model</th>
+              <th>Bg. Stab.</th>
+              <th>Motion Sim.</th>
+              <th>App. Stab.</th>
+              <th>3D Shape</th>
+              <th>Phys. Plaus.</th>
+              <th>Success</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td rowspan="3">V2V</td>
+              <td>Cosmos2.5-2B</td>
+              <td><strong>0.77</strong></td>
+              <td><strong>0.60</strong></td>
+              <td>0.49</td>
+              <td>0.63</td>
+              <td>0.71</td>
+              <td><strong>0.22</strong></td>
+            </tr>
+            <tr>
+              <td>Cosmos2.5-14B</td>
+              <td>0.55</td>
+              <td>0.52</td>
+              <td>0.46</td>
+              <td>0.59</td>
+              <td>0.68</td>
+              <td>0.14</td>
+            </tr>
+            <tr>
+              <td>MAGI-1-4.5B</td>
+              <td>0.21</td>
+              <td>0.38</td>
+              <td>0.38</td>
+              <td>0.50</td>
+              <td>0.52</td>
+              <td>0.01</td>
+            </tr>
+            <tr>
+              <td rowspan="5">I2V</td>
+              <td>Cosmos2.5-2B</td>
+              <td>0.61</td>
+              <td>0.51</td>
+              <td>0.44</td>
+              <td>0.57</td>
+              <td>0.66</td>
+              <td>0.12</td>
+            </tr>
+            <tr>
+              <td>Cosmos2.5-14B</td>
+              <td>0.51</td>
+              <td>0.47</td>
+              <td>0.44</td>
+              <td>0.56</td>
+              <td>0.67</td>
+              <td>0.08</td>
+            </tr>
+            <tr>
+              <td>MAGI-1-4.5B</td>
+              <td>0.19</td>
+              <td>0.40</td>
+              <td>0.46</td>
+              <td>0.52</td>
+              <td>0.54</td>
+              <td>0.02</td>
+            </tr>
+            <tr>
+              <td>CogVideoX1.5-5B</td>
+              <td>0.39</td>
+              <td>0.29</td>
+              <td>0.33</td>
+              <td>0.40</td>
+              <td>0.58</td>
+              <td>0.02</td>
+            </tr>
+            <tr>
+              <td>Wan2.2-14B</td>
+              <td>0.76</td>
+              <td>0.59</td>
+              <td><strong>0.52</strong></td>
+              <td><strong>0.72</strong></td>
+              <td><strong>0.73</strong></td>
+              <td>0.20</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== QUALITATIVE RESULTS ============== -->
+  <section class="section" id="results">
+    <div class="container">
+      <h2>Qualitative Results</h2>
+      <p class="lead">
+        Side-by-side comparisons of generated futures for the same physical event. While most models
+        preserve coarse scene structure, they fail to maintain consistent object dynamics —
+        exhibiting trajectory drift, incorrect physical interactions, and identity distortions.
+      </p>
+
+      <!-- ============ EVENT SELECTOR ============ -->
+      <div class="selector" data-selector="event" data-target="qual-grid">
+        <span class="selector-label">Event:</span>
+        <button class="selector-btn is-active" data-value="collision">Collision</button>
+        <button class="selector-btn" data-value="fall">Fall</button>
+        <button class="selector-btn" data-value="occlusion">Occlusion</button>
+      </div>
+
+      <!-- ============ MODEL COMPARISON GRID (3×3) ============
+           Files expected: assets/videos/qual_{event}_{model}.mp4
+           Where {model} is one of:
+             render, cosmos2b_v2v, cosmos14b_v2v, magi_v2v,
+             cosmos2b_i2v, cosmos14b_i2v, magi_i2v, cogvideox_i2v, wan_i2v
+           Example: qual_collision_cosmos14b_v2v.mp4 -->
+      <div class="qualitative-grid" id="qual-grid" data-template="assets/videos/{model}_{event}.mp4">
+
+        <!-- Row 1 -->
+        <div class="qualitative-cell">
+          <div class="cell-label">Render <span class="cell-tag tag-gt">GT</span></div>
+          <div class="video-slot" data-model="render">
+            <video autoplay muted loop playsinline preload="metadata"></video>
+            <div class="media-placeholder media-placeholder--video">
+              <span class="placeholder-icon">🎥</span>
+              <span class="placeholder-hint"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="qualitative-cell">
+          <div class="cell-label">Wan2.2-14B <span class="cell-tag tag-i2v">I2V</span></div>
+          <div class="video-slot" data-model="wan14b_i2v">
+            <video autoplay muted loop playsinline preload="metadata"></video>
+            <div class="media-placeholder media-placeholder--video">
+              <span class="placeholder-icon">🎥</span>
+              <span class="placeholder-hint"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="qualitative-cell">
+          <div class="cell-label">Cosmos2.5-2B <span class="cell-tag tag-v2v">V2V</span></div>
+          <div class="video-slot" data-model="cosmos2b_v2v">
+            <video autoplay muted loop playsinline preload="metadata"></video>
+            <div class="media-placeholder media-placeholder--video">
+              <span class="placeholder-icon">🎥</span>
+              <span class="placeholder-hint"></span>
+            </div>
+          </div>
+        </div>
+        <div class="qualitative-cell">
+          <div class="cell-label">Cosmos2.5-14B <span class="cell-tag tag-v2v">V2V</span></div>
+          <div class="video-slot" data-model="cosmos14b_v2v">
+            <video autoplay muted loop playsinline preload="metadata"></video>
+            <div class="media-placeholder media-placeholder--video">
+              <span class="placeholder-icon">🎥</span>
+              <span class="placeholder-hint"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="qualitative-cell">
+          <div class="cell-label">MAGI-1-4.5B <span class="cell-tag tag-v2v">V2V</span></div>
+          <div class="video-slot" data-model="magi4.5b_v2v">
+            <video autoplay muted loop playsinline preload="metadata"></video>
+            <div class="media-placeholder media-placeholder--video">
+              <span class="placeholder-icon">🎥</span>
+              <span class="placeholder-hint"></span>
+            </div>
+          </div>
+        </div>
+        <div class="qualitative-cell">
+          <div class="cell-label">Cosmos2.5-2B <span class="cell-tag tag-i2v">I2V</span></div>
+          <div class="video-slot" data-model="cosmos2b_i2v">
+            <video autoplay muted loop playsinline preload="metadata"></video>
+            <div class="media-placeholder media-placeholder--video">
+              <span class="placeholder-icon">🎥</span>
+              <span class="placeholder-hint"></span>
+            </div>
+          </div>
+        </div>
+        <div class="qualitative-cell">
+          <div class="cell-label">Cosmos2.5-14B <span class="cell-tag tag-i2v">I2V</span></div>
+          <div class="video-slot" data-model="cosmos14b_i2v">
+            <video autoplay muted loop playsinline preload="metadata"></video>
+            <div class="media-placeholder media-placeholder--video">
+              <span class="placeholder-icon">🎥</span>
+              <span class="placeholder-hint"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 3 -->
+        <div class="qualitative-cell">
+          <div class="cell-label">MAGI-1-4.5B <span class="cell-tag tag-i2v">I2V</span></div>
+          <div class="video-slot" data-model="magi4.5b_i2v">
+            <video autoplay muted loop playsinline preload="metadata"></video>
+            <div class="media-placeholder media-placeholder--video">
+              <span class="placeholder-icon">🎥</span>
+              <span class="placeholder-hint"></span>
+            </div>
+          </div>
+        </div>
+        <div class="qualitative-cell">
+          <div class="cell-label">CogVideoX1.5-5B <span class="cell-tag tag-i2v">I2V</span></div>
+          <div class="video-slot" data-model="cog5b_i2v">
+            <video autoplay muted loop playsinline preload="metadata"></video>
+            <div class="media-placeholder media-placeholder--video">
+              <span class="placeholder-icon">🎥</span>
+              <span class="placeholder-hint"></span>
+            </div>
+          </div>
+        </div>
+
+
+      </div>
+
+      <!-- ============ INTERVENTION SHOWCASE ============ -->
+      <h3>Counterfactual Variants of the Same Event</h3>
+      <p>
+        Each row below shows the same physical event under different interventions — fed to the same
+        model. A counterfactually consistent model would produce stable, comparable predictions across
+        all variants.
+      </p>
+
+      <!-- ============ MODEL SELECTOR ============ -->
+      <div class="selector" data-selector="model" data-target="cf-grid">
+        <span class="selector-label">Model:</span>
+        <button class="selector-btn is-active" data-value="cosmos2b_v2v">Cosmos2.5-2B</button>
+        <button class="selector-btn" data-value="cosmos14b_v2v">Cosmos2.5-14B</button>
+        <button class="selector-btn" data-value="magi4.5b_v2v">MAGI-1-4.5B</button>
+        <button class="selector-btn" data-value="cosmos2b_i2v">Cosmos2.5-2B</button>
+        <button class="selector-btn" data-value="cosmos14b_i2v">Cosmos2.5-14B</button>
+        <button class="selector-btn" data-value="wan14b_i2v">Wan2.2-14B</button>
+        <button class="selector-btn" data-value="magi4.5b_i2v">MAGI-1-4.5B</button>
+        <button class="selector-btn" data-value="cog5b_i2v">CogVideoX1.5-5B</button>
+      </div>
+
+      <!-- ============ COUNTERFACTUAL GRID ============
+           Files expected: assets/videos/cf_{model}_{variant}.mp4
+           e.g. cf_cosmos_viewpoint.mp4, cf_wan_scene.mp4
+           Layout: original (left column) vs. 2×2 variants (right column) -->
+      <div class="counterfactual-grid" id="cf-grid" data-template="assets/videos/interv_{model}_{variant}.mp4">
+        <!-- Left column: the reference -->
+        <div class="counterfactual-original">
+          <div class="cell-label">Original</div>
+          <div class="video-slot" data-variant="original">
+            <video autoplay muted loop playsinline preload="metadata"></video>
+            <div class="media-placeholder media-placeholder--video">
+              <span class="placeholder-icon">🎥</span>
+              <span class="placeholder-hint"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right column: 2×2 grid of counterfactual variants -->
+        <div class="counterfactual-variants">
+          <div class="counterfactual-cell">
+            <div class="cell-label">Viewpoint</div>
+            <div class="video-slot" data-variant="view">
+              <video autoplay muted loop playsinline preload="metadata"></video>
+              <div class="media-placeholder media-placeholder--video small">
+                <span class="placeholder-icon">🎥</span>
+                <span class="placeholder-hint"></span>
+              </div>
+            </div>
+          </div>
+          <div class="counterfactual-cell">
+            <div class="cell-label">Appearance</div>
+            <div class="video-slot" data-variant="appearance">
+              <video autoplay muted loop playsinline preload="metadata"></video>
+              <div class="media-placeholder media-placeholder--video small">
+                <span class="placeholder-icon">🎥</span>
+                <span class="placeholder-hint"></span>
+              </div>
+            </div>
+          </div>
+          <div class="counterfactual-cell">
+            <div class="cell-label">Scene</div>
+            <div class="video-slot" data-variant="scene">
+              <video autoplay muted loop playsinline preload="metadata"></video>
+              <div class="media-placeholder media-placeholder--video small">
+                <span class="placeholder-icon">🎥</span>
+                <span class="placeholder-hint"></span>
+              </div>
+            </div>
+          </div>
+          <div class="counterfactual-cell">
+            <div class="cell-label">Object</div>
+            <div class="video-slot" data-variant="object">
+              <video autoplay muted loop playsinline preload="metadata"></video>
+              <div class="media-placeholder media-placeholder--video small">
+                <span class="placeholder-icon">🎥</span>
+                <span class="placeholder-hint"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== LIMITATIONS ============== -->
+  <section class="section section--accent" id="limitations">
+    <div class="container narrow">
+      <h2>Limitations</h2>
+      <ul class="limitations-list">
+        <li>
+          <strong>Synthetic-to-real domain gap.</strong> CRONOS uses Unreal Engine renderings; this
+          control is necessary for matched counterfactuals, but introduces a domain gap.
+        </li>
+        <li>
+          <strong>Single-reference rollouts.</strong> Most metrics compare against one rendered
+          reference, while the conditioning permits multiple plausible futures. We mitigate this
+          with multi-seed evaluation and reference-independent stability metrics.
+        </li>
+        <li>
+          <strong>Scope of evaluated models.</strong> We evaluate open-source models with reproducible
+          settings, not closed commercial systems (Veo, Sora, Kling). Even so, the benchmark is far
+          from saturated.
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============== BIBTEX ============== -->
+  <section class="section" id="bibtex">
+    <div class="container narrow">
+      <h2>BibTeX</h2>
+      <pre class="bibtex"><code>@article{cronos2026,
+  title   = {CRONOS: Benchmarking Counterfactual Physical Consistency in Video Models},
+  author  = {León Begiristain, Olaf Duenkel, Adam Kortylewski},
+  journal = {arXiv preprint},
+  year    = {2026}
+}</code></pre>
+    </div>
+  </section>
+
+  <!-- ============== INTERACTIVE SELECTORS (video swapping) ============== -->
+  <script>
+    (function () {
+      // Sets a single .video-slot's source. Falls back to placeholder on error.
+      function loadSlot(slot, src) {
+        var video = slot.querySelector('video');
+        var placeholder = slot.querySelector('.media-placeholder');
+        var hint = placeholder.querySelector('.placeholder-hint');
+        var filename = src.split('/').pop();
+
+        hint.textContent = filename;
+
+        // Reset to "loading" state: hide video, show placeholder until we know.
+        video.style.display = 'none';
+        placeholder.style.display = '';
+
+        video.onloadeddata = function () {
+          video.style.display = '';
+          placeholder.style.display = 'none';
+          var p = video.play();
+          if (p && typeof p.catch === 'function') p.catch(function () {});
+        };
+        video.onerror = function () {
+          video.style.display = 'none';
+          placeholder.style.display = '';
+        };
+
+        video.src = src;
+        video.load();
+      }
+
+      // Re-render a grid using the current active value of its selector.
+      function refreshGrid(grid, key, value) {
+        var template = grid.getAttribute('data-template'); // e.g. assets/videos/qual_{event}_{model}.mp4
+        var slots = grid.querySelectorAll('.video-slot');
+        slots.forEach(function (slot) {
+          var src = template;
+          // Substitute the selector's key
+          src = src.replace('{' + key + '}', value);
+          // Substitute the slot's own key (data-model or data-variant)
+          if (slot.dataset.model) src = src.replace('{model}', slot.dataset.model);
+          if (slot.dataset.variant) src = src.replace('{variant}', slot.dataset.variant);
+          loadSlot(slot, src);
+        });
+      }
+
+      // Wire up each .selector
+      var selectorTargets = new Set();
+      document.querySelectorAll('.selector').forEach(function (sel) {
+        var key = sel.dataset.selector;                    // "event" or "model"
+        var grid = document.getElementById(sel.dataset.target);
+        if (!grid) return;
+        selectorTargets.add(grid);
+
+        sel.querySelectorAll('.selector-btn').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            sel.querySelectorAll('.selector-btn').forEach(function (b) { b.classList.remove('is-active'); });
+            btn.classList.add('is-active');
+            refreshGrid(grid, key, btn.dataset.value);
+          });
+        });
+
+        // Initial render with whichever button is active by default
+        var active = sel.querySelector('.selector-btn.is-active') || sel.querySelector('.selector-btn');
+        if (active) refreshGrid(grid, key, active.dataset.value);
+      });
+
+      // Auto-init standalone grids (no selector): just resolve each slot's own data-* keys.
+      document.querySelectorAll('[data-template]').forEach(function (grid) {
+        if (selectorTargets.has(grid)) return;
+        var template = grid.getAttribute('data-template');
+        grid.querySelectorAll('.video-slot').forEach(function (slot) {
+          var src = template;
+          if (slot.dataset.model)   src = src.replace('{model}', slot.dataset.model);
+          if (slot.dataset.variant) src = src.replace('{variant}', slot.dataset.variant);
+          if (slot.dataset.event)   src = src.replace('{event}', slot.dataset.event);
+          loadSlot(slot, src);
+        });
+      });
+    })();
+  </script>
+
+  <!-- ============== FOOTER ============== -->
+  <footer class="footer">
+    <div class="container narrow">
+      <p>
+        Template inspired by academic project pages.
+        Page source available <a href="#">on GitHub</a>.
+      </p>
+    </div>
+  </footer>
+
+</body>
+</html>
