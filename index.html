@@ -16,6 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -44,7 +45,7 @@
         <a class="btn" href="#" target="_blank" rel="noopener">
           <span class="btn-icon">📄</span> Paper
         </a>
-        <a class="btn" href="#" target="_blank" rel="noopener">
+        <a class="btn" href="https://github.com/GenIntel/CRONOS-benchmark" target="_blank" rel="noopener">
           <span class="btn-icon">💻</span> Code
         </a>
         <a class="btn" href="#" target="_blank" rel="noopener">
@@ -55,21 +56,11 @@
         </a>
       </nav>
 
-      <!-- ============ TEASER VIDEO PLACEHOLDER ============ -->
+      <!-- ============ TEASER VIDEO with controls ============ -->
       <div class="teaser-media">
-        <!-- TODO: Replace this placeholder with the main teaser video -->
-        <!--
-        <video autoplay muted loop playsinline poster="assets/images/teaser_poster.jpg">
-          <source src="assets/videos/teaser.mp4" type="video/mp4">
+        <video controls poster="assets/images/video_frame.jpg" class="teaser-video">
+          <source src="assets/videos/CRONOS.mov" type="video/mp4">
         </video>
-        -->
-        <div class="media-placeholder media-placeholder--video">
-          <div class="placeholder-label">
-            <span class="placeholder-icon">🎥</span>
-            <span class="placeholder-text">Teaser Video</span>
-            <span class="placeholder-hint">Replace with <code>assets/videos/teaser.mp4</code></span>
-          </div>
-        </div>
       </div>
 
       <p class="teaser-caption">
@@ -85,9 +76,7 @@
     <div class="container narrow">
       <h2>Abstract</h2>
       <p>
-        Video prediction is increasingly viewed as a path toward generalizable world models, yet it
-        remains unclear whether these systems learn underlying causal structure or merely exploit
-        superficial visual correlations for future prediction. We introduce <strong>CRONOS</strong>,
+        We introduce <strong>CRONOS</strong>,
         an intervention-based benchmark designed to evaluate <em>counterfactual physical consistency</em>:
         whether a model's predictions of physical events respond appropriately to controlled changes
         in the visual input, such as variations of scene context, viewpoint, object appearance, and
@@ -95,10 +84,7 @@
         controlled, high-fidelity generation of videos across diverse scenes and dynamics. Unlike
         prior benchmarks that evaluate video prediction on fixed scenes, CRONOS systematically
         intervenes on four key factors while keeping the underlying physical event — such as a
-        collision, occlusion, or fall — fixed.
-      </p>
-      <p>
-        Our evaluation of recent open-source video generators reveals <strong>substantial failures
+        collision, occlusion, or fall — fixed. Our evaluation of recent open-source video generators reveals <strong>substantial failures
         in counterfactual physical consistency</strong>: prediction quality for the same physical
         event is affected by appearance, environment, and particularly by viewpoint changes. CRONOS
         provides a principled and reproducible testbed for diagnosing how generated video quality
@@ -113,11 +99,10 @@
     <div class="container narrow">
       <div class="definition-card">
         <div class="definition-label">Core Concept</div>
-        <h3 class="definition-title">Counterfactual Physical Consistency</h3>
+        <h2 class="definition-title">Counterfactual Physical Consistency</h2>
         <p class="definition-body">
           A model's ability to produce predictions of physical events that remain coherent across
-          counterfactual variants of the visual input — stable under nuisance interventions
-          (e.g., viewpoint, appearance) and coherent under structured ones (e.g., object swaps).
+          counterfactual variants of the visual input.
         </p>
       </div>
     </div>
@@ -154,7 +139,7 @@
           <div class="event-media">
             <video autoplay muted loop playsinline class="figure-image"><source src="assets/videos/event_fall.mp4" type="video/mp4"></video>
           </div>
-          <h4>Fall (roll-to-drop)</h4>
+          <h4>Fall</h4>
           <p>An object rolls across a surface and falls from an edge — testing prediction across
             changing contact conditions and free-fall motion.</p>
         </div>
@@ -182,7 +167,7 @@
       <h3>Systematic Visual Interventions</h3>
       <p>
         For each event, CRONOS applies one intervention at a time while holding the remaining
-        variables fixed. This isolates model sensitivity to a single factor.
+        variables fixed. 
       </p>
 
       <!-- Compact list of the four interventions -->
@@ -192,9 +177,8 @@
           <div class="intervention-body">
             <div class="intervention-head">
               <span class="intervention-name">Camera Viewpoint</span>
-              <span class="intervention-tag tag-nuisance">Nuisance</span>
             </div>
-            <p>The rendering viewpoint is changed while all other factors are preserved.
+            <p>The rendering viewpoint is changed.
               Probes whether models disentangle scene geometry from observed motion.</p>
           </div>
         </li>
@@ -203,9 +187,8 @@
           <div class="intervention-body">
             <div class="intervention-head">
               <span class="intervention-name">Object Appearance</span>
-              <span class="intervention-tag tag-nuisance">Nuisance</span>
             </div>
-            <p>Visual attributes (e.g., color) are changed without altering physical parameters —
+            <p>Visual attributes (e.g., color) of the primary object are changed without altering physical parameters —
               isolating whether models disentangle appearance from dynamics.</p>
           </div>
         </li>
@@ -214,10 +197,10 @@
           <div class="intervention-body">
             <div class="intervention-head">
               <span class="intervention-name">Scene</span>
-              <span class="intervention-tag tag-structured">Structured</span>
             </div>
-            <p>Background environment and lighting change while event dynamics are preserved —
-              tests robustness to contextual variation that alters visual statistics.</p>
+            <p>The full scene is replaced — background, lighting, and event-relevant layout details
+              change. Alters how the event unfolds across scenes, testing whether models
+              adapt the event dynamics coherently to the new context.</p>
           </div>
         </li>
         <li class="intervention-item">
@@ -225,7 +208,6 @@
           <div class="intervention-body">
             <div class="intervention-head">
               <span class="intervention-name">Object Category</span>
-              <span class="intervention-tag tag-structured">Structured</span>
             </div>
             <p>The object of interest is replaced with another, changing both visual properties and
               physical parameters (mass, friction). Probes generalization across instances.</p>
@@ -242,7 +224,7 @@
       </p>
 
       <div class="metric-list">
-        <div class="metric-item"><strong>Background Stability</strong> — perturbations in environment over time.</div>
+        <div class="metric-item"><strong>Background Stability</strong> — perturbations in environment over time, camera movement and appearance of new objects.</div>
         <div class="metric-item"><strong>Appearance Stability</strong> — consistency of object appearance over time.</div>
         <div class="metric-item"><strong>3D-Shape Stability</strong> — geometric consistency of objects throughout the video.</div>
         <div class="metric-item"><strong>Motion Similarity</strong> — motion agreement with reference rendered video.</div>
@@ -266,7 +248,7 @@
           <div class="finding-number">01</div>
           <h3>Models fail at basic rigid-body physics</h3>
           <p>
-            All evaluated open-source video models fail to reliably generate short clips of basic
+            All evaluated video models fail to reliably generate short clips of basic
             rigid-body physics. Even the strongest model (<strong>Cosmos2.5-2B V2V</strong>) achieves
             only a <strong>22% success rate</strong>, with most models below 5%.
           </p>
@@ -278,7 +260,7 @@
           <p>
             Generation quality substantially shifts under every intervention — including superficial
             appearance changes, and <strong>particularly under viewpoint, object-type, and scene
-            interventions</strong>. Models encode predictions in view-dependent ways.
+            interventions</strong>. <!--Models encode predictions in view-dependent ways.-->
           </p>
         </div>
 
@@ -303,19 +285,9 @@
         </div>
       </div>
 
-      <!-- ============ RESULTS FIGURE PLACEHOLDER ============ -->
-      <figure class="figure">
-        <img src="assets/images/sensitivities.png" alt="Sensitivities to counterfactual interventions." class="figure-image" />
-        <figcaption>
-          <strong>Figure 2.</strong> Sensitivity to counterfactual interventions averaged across
-          metrics. Lower is better. All models show substantial sensitivity across every intervention
-          type, including superficial appearance changes.
-        </figcaption>
-      </figure>
-
       <!-- ============ BENCHMARK TABLE ============ -->
       <h3>Benchmark Results</h3>
-      <p>Performance averaged across all videos. Metrics are normalized to [0, 1], higher is better.</p>
+      <p>Performance averaged across all videos. Metrics are normalized to 0-1, higher is better.</p>
 
       <div class="table-wrap">
         <table class="results-table">
@@ -409,6 +381,29 @@
           </tbody>
         </table>
       </div>
+
+      <!-- ============ INTERACTIVE SENSITIVITY CHART ============
+           Values in `sensitivityData` (script block at the bottom of the file) are
+           read off the paper's Figure 5. Edit them there if the final numbers differ. -->
+      <figure class="figure sensitivity-figure">
+        <div class="chart-controls">
+          <div class="chart-toggle" role="tablist" aria-label="Conditioning mode">
+            <button type="button" class="chart-toggle-btn is-active" data-mode="v2v" role="tab" aria-selected="true">V2V</button>
+            <button type="button" class="chart-toggle-btn" data-mode="i2v" role="tab" aria-selected="false">I2V</button>
+          </div>
+          <div class="chart-meta">
+            <span class="chart-meta-hint">Hover bars for exact values · click legend to hide a model</span>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="sensitivity-chart" aria-label="Sensitivity to interventions chart"></canvas>
+        </div>
+        <figcaption>
+          <strong>Figure 2.</strong> Sensitivity to counterfactual interventions averaged across
+          metrics. Lower is better. All models show substantial sensitivity across every intervention
+          type, including superficial appearance changes.
+        </figcaption>
+      </figure>
     </div>
   </section>
 
@@ -418,8 +413,7 @@
       <h2>Qualitative Results</h2>
       <p class="lead">
         Side-by-side comparisons of generated futures for the same physical event. While most models
-        preserve coarse scene structure, they fail to maintain consistent object dynamics —
-        exhibiting trajectory drift, incorrect physical interactions, and identity distortions.
+        preserve coarse scene structure, they fail to generate plausible motion, static camera viewpoints, or consistent objects.
       </p>
 
       <!-- ============ EVENT SELECTOR ============ -->
@@ -542,22 +536,27 @@
       <!-- ============ INTERVENTION SHOWCASE ============ -->
       <h3>Counterfactual Variants of the Same Event</h3>
       <p>
-        Each row below shows the same physical event under different interventions — fed to the same
-        model. A counterfactually consistent model would produce stable, comparable predictions across
+       Generated video and four intervention variants for a selected model. All videos are generated with the same random seed. A counterfactually consistent model would produce stable, comparable predictions across
         all variants.
       </p>
 
-      <!-- ============ MODEL SELECTOR ============ -->
+      <!-- ============ MODEL SELECTOR (3 V2V + 5 I2V) ============ -->
       <div class="selector" data-selector="model" data-target="cf-grid">
         <span class="selector-label">Model:</span>
-        <button class="selector-btn is-active" data-value="cosmos2b_v2v">Cosmos2.5-2B</button>
-        <button class="selector-btn" data-value="cosmos14b_v2v">Cosmos2.5-14B</button>
-        <button class="selector-btn" data-value="magi4.5b_v2v">MAGI-1-4.5B</button>
-        <button class="selector-btn" data-value="cosmos2b_i2v">Cosmos2.5-2B</button>
-        <button class="selector-btn" data-value="cosmos14b_i2v">Cosmos2.5-14B</button>
-        <button class="selector-btn" data-value="wan14b_i2v">Wan2.2-14B</button>
-        <button class="selector-btn" data-value="magi4.5b_i2v">MAGI-1-4.5B</button>
-        <button class="selector-btn" data-value="cog5b_i2v">CogVideoX1.5-5B</button>
+        <div class="selector-row">
+          <span class="mode-tag tag-v2v">V2V</span>
+          <button class="selector-btn is-active" data-value="cosmos2b_v2v">Cosmos2.5-2B</button>
+          <button class="selector-btn" data-value="cosmos14b_v2v">Cosmos2.5-14B</button>
+          <button class="selector-btn" data-value="magi4.5b_v2v">MAGI-1-4.5B</button>
+        </div>
+        <div class="selector-row">
+          <span class="mode-tag tag-i2v">I2V</span>
+          <button class="selector-btn" data-value="cosmos2b_i2v">Cosmos2.5-2B</button>
+          <button class="selector-btn" data-value="cosmos14b_i2v">Cosmos2.5-14B</button>
+          <button class="selector-btn" data-value="magi4.5b_i2v">MAGI-1-4.5B</button>
+          <button class="selector-btn" data-value="cog5b_i2v">CogVideoX1.5-5B</button>
+          <button class="selector-btn" data-value="wan14b_i2v">Wan2.2-14B</button>
+        </div>
       </div>
 
       <!-- ============ COUNTERFACTUAL GRID ============
@@ -659,6 +658,140 @@
 }</code></pre>
     </div>
   </section>
+
+  <!-- ============== INTERACTIVE SENSITIVITY CHART ============== -->
+  <script>
+    (function () {
+      var canvas = document.getElementById('sensitivity-chart');
+      if (!canvas || typeof Chart === 'undefined') return;
+
+      var interventions = ['View', 'Object', 'Appearance', 'Scene'];
+
+      // Palette matching the paper's Figure 5 — one consistent color per model
+      var palette = {
+        cosmos2b:   '#22c55e',  // light green
+        cosmos14b:  '#15803d',  // dark green
+        magi:       '#1d4ed8',  // blue
+        cogvideox:  '#dc2626',  // red
+        wan:        '#f59e0b'   // orange
+      };
+
+      var sensitivityData = {
+        v2v: [
+          { id: 'cosmos2b',  label: 'Cosmos2.5-2B',    values: [0.35, 0.41, 0.18, 0.37] },
+          { id: 'cosmos14b', label: 'Cosmos2.5-14B',   values: [0.37, 0.40, 0.18, 0.47] },
+          { id: 'magi',      label: 'MAGI-1-4.5B',     values: [0.40, 0.34, 0.22, 0.35] }
+        ],
+        i2v: [
+          { id: 'cosmos2b',  label: 'Cosmos2.5-2B',    values: [0.37, 0.43, 0.19, 0.45] },
+          { id: 'cosmos14b', label: 'Cosmos2.5-14B',   values: [0.35, 0.41, 0.19, 0.45] },
+          { id: 'magi',      label: 'MAGI-1-4.5B',     values: [0.42, 0.36, 0.22, 0.34] },
+          { id: 'cogvideox', label: 'CogVideoX1.5-5B', values: [0.37, 0.42, 0.24, 0.42] },
+          { id: 'wan',       label: 'Wan2.2-14B',      values: [0.31, 0.16, 0.20, 0.38] }
+        ]
+      };
+
+      function buildDatasets(mode) {
+        return sensitivityData[mode].map(function (m) {
+          return {
+            label: m.label,
+            data: m.values,
+            backgroundColor: palette[m.id] + 'cc',     // 80% opacity
+            borderColor: palette[m.id],
+            borderWidth: 1,
+            borderRadius: 4,
+            hoverBackgroundColor: palette[m.id],
+            barPercentage: 0.86,
+            categoryPercentage: 0.78
+          };
+        });
+      }
+
+      var chart = new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels: interventions,
+          datasets: buildDatasets('v2v')
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 600, easing: 'easeOutQuart' },
+          interaction: { mode: 'nearest', intersect: true },
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                font: { family: 'Inter, sans-serif', size: 13, weight: '500' },
+                color: '#1a1d23',
+                usePointStyle: true,
+                pointStyle: 'rectRounded',
+                boxWidth: 12,
+                padding: 16
+              }
+            },
+            tooltip: {
+              backgroundColor: 'rgba(15, 23, 42, 0.95)',
+              titleColor: '#fff',
+              bodyColor: '#e2e8f0',
+              titleFont: { family: 'Inter, sans-serif', weight: '600', size: 13 },
+              bodyFont: { family: 'Inter, sans-serif', size: 12 },
+              padding: 12,
+              cornerRadius: 8,
+              displayColors: true,
+              boxPadding: 6,
+              callbacks: {
+                title: function (items) { return 'Intervention: ' + items[0].label; },
+                label: function (ctx) {
+                  return ' ' + ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(2);
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: {
+                color: '#5a6072',
+                font: { family: 'Inter, sans-serif', size: 13, weight: '500' }
+              }
+            },
+            y: {
+              beginAtZero: true,
+              max: 0.6,
+              title: {
+                display: true,
+                text: 'Sensitivity to Interventions  (lower = better)',
+                color: '#5a6072',
+                font: { family: 'Inter, sans-serif', size: 12, weight: '600' }
+              },
+              ticks: {
+                color: '#5a6072',
+                font: { family: 'Inter, sans-serif', size: 12 },
+                stepSize: 0.1
+              },
+              grid: { color: 'rgba(15, 23, 42, 0.06)' }
+            }
+          }
+        }
+      });
+
+      // Mode toggle wiring
+      document.querySelectorAll('.chart-toggle-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var mode = btn.dataset.mode;
+          document.querySelectorAll('.chart-toggle-btn').forEach(function (b) {
+            b.classList.remove('is-active');
+            b.setAttribute('aria-selected', 'false');
+          });
+          btn.classList.add('is-active');
+          btn.setAttribute('aria-selected', 'true');
+          chart.data.datasets = buildDatasets(mode);
+          chart.update();
+        });
+      });
+    })();
+  </script>
 
   <!-- ============== INTERACTIVE SELECTORS (video swapping) ============== -->
   <script>
