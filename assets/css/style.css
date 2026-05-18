@@ -569,32 +569,32 @@ code {
   max-width: 100%;
 }
 
-/* Model selector — stacked rows grouped by mode (V2V, I2V), centered on page */
+/* Model selector — stacked rows grouped by mode (V2V, I2V), centered on page.
+   align-items: stretch makes the shorter row fill the wider row's width so the pill
+   sizes to the widest row's content (more reliable in Safari than max-content tricks). */
 .selector[data-selector="model"] {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
+  flex-wrap: nowrap;            /* override the global .selector flex-wrap */
   gap: 10px;
-  width: max-content;
+  width: fit-content;
   max-width: 100%;
   margin: 28px auto 20px;
   padding: 16px 22px;
   border-radius: 18px;
-  overflow-x: auto;            /* allow horizontal scroll if the viewport is too narrow */
 }
 .selector[data-selector="model"] .selector-label {
   text-align: center;
   margin: 0 0 4px 0;
-  width: 100%;
 }
 .selector-row {
   display: flex;
+  flex-wrap: nowrap;
   align-items: center;
-  flex-wrap: nowrap;            /* keep every row on a single line */
   justify-content: center;
   gap: 8px;
-  width: max-content;           /* size to full content width */
-  max-width: 100%;
+  min-width: max-content;       /* force the row to extend to its full content */
 }
 .mode-tag {
   display: inline-flex;

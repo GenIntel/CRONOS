@@ -58,7 +58,7 @@
 
       <!-- ============ TEASER VIDEO with controls ============ -->
       <div class="teaser-media">
-        <video controls poster="assets/images/video_frame.jpg" class="teaser-video">
+        <video controls poster="assets/images/video_frame.png" class="teaser-video">
           <source src="assets/videos/CRONOS.mov" type="video/mp4">
         </video>
       </div>
@@ -250,7 +250,7 @@
           <p>
             All evaluated video models fail to reliably generate short clips of basic
             rigid-body physics. Even the strongest model (<strong>Cosmos2.5-2B V2V</strong>) achieves
-            only a <strong>22% success rate</strong>, with most models below 5%.
+            only a <strong>22% success rate</strong>, with some models below 5%.
           </p>
         </div>
 
@@ -790,6 +790,14 @@
           chart.update();
         });
       });
+
+      // Safari/iOS often paints the chart before the Inter web font loads, leaving
+      // axis labels measured with the fallback font. Re-resize once fonts are ready.
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(function () { chart.resize(); chart.update('none'); });
+      }
+      // And again on full load — guards against late layout shifts.
+      window.addEventListener('load', function () { chart.resize(); });
     })();
   </script>
 
