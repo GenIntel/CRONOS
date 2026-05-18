@@ -23,7 +23,6 @@
   <!-- ============== HEADER / HERO ============== -->
   <header class="hero">
     <div class="container">
-      <div class="venue-badge">Submission Under Review</div>
       <h1 class="paper-title">
         CRONOS: Benchmarking Counterfactual<br>
         Physical Consistency in Video Models
@@ -35,9 +34,9 @@
         <span class="author">Adam Kortylewski<sup>3</sup></span>
       </div>
       <div class="affiliations">
-        <span><sup>1</sup>University of Freiburg</span>
-        <span><sup>2</sup>Max Planck Institute for Informatics</span>
-        <span><sup>3</sup>CISPA Helmholtz Center for Information Security</span>
+        <span><sup>1</sup>University of Freiburg, Germany</span>
+        <span><sup>2</sup>Max Planck Institute for Informatics, Saarland Informatics Campus, Germany</span>
+        <span><sup>3</sup>CISPA Helmholtz Center for Information Security, Germany</span>
       </div>
 
       <!-- Action buttons -->
@@ -62,18 +61,12 @@
           <source src="assets/videos/CRONOS.mov" type="video/mp4">
         </video>
       </div>
-
-      <p class="teaser-caption">
-        CRONOS evaluates whether video models produce predictions of physical events that remain coherent
-        under controlled interventions in <strong>camera viewpoint</strong>, <strong>scene</strong>,
-        <strong>object appearance</strong>, and <strong>object category</strong>.
-      </p>
     </div>
   </header>
 
   <!-- ============== ABSTRACT ============== -->
   <section class="section" id="abstract">
-    <div class="container narrow">
+    <div class="container wide">
       <h2>Abstract</h2>
       <p>
         We introduce <strong>CRONOS</strong>,
@@ -102,7 +95,7 @@
         <h2 class="definition-title">Counterfactual Physical Consistency</h2>
         <p class="definition-body">
           A model's ability to produce predictions of physical events that remain coherent across
-          counterfactual variants of the visual input.
+          counterfactual variants of the visual input, such as changes in viewpoint, scene context, object appearance, or object category.
         </p>
       </div>
     </div>
@@ -287,99 +280,109 @@
 
       <!-- ============ BENCHMARK TABLE ============ -->
       <h3>Benchmark Results</h3>
-      <p>Performance averaged across all videos. Metrics are normalized to 0-1, higher is better.</p>
+      <p>
+        Performance averaged across all videos. The table reports the headline
+        <strong>Success</strong> rate; per-metric scores (background stability, motion similarity,
+        appearance stability, 3D shape, physical plausibility) are plotted in the radar on the right
+        — all axes on a 0-1 scale. <em>Click a row to toggle that model on or off in the radar.</em>
+      </p>
 
-      <div class="table-wrap">
-        <table class="results-table">
-          <thead>
-            <tr>
-              <th>Mode</th>
-              <th>Model</th>
-              <th>Bg. Stab.</th>
-              <th>Motion Sim.</th>
-              <th>App. Stab.</th>
-              <th>3D Shape</th>
-              <th>Phys. Plaus.</th>
-              <th>Success</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td rowspan="3">V2V</td>
-              <td>Cosmos2.5-2B</td>
-              <td><strong>0.77</strong></td>
-              <td><strong>0.60</strong></td>
-              <td>0.49</td>
-              <td>0.63</td>
-              <td>0.71</td>
-              <td><strong>0.22</strong></td>
-            </tr>
-            <tr>
-              <td>Cosmos2.5-14B</td>
-              <td>0.55</td>
-              <td>0.52</td>
-              <td>0.46</td>
-              <td>0.59</td>
-              <td>0.68</td>
-              <td>0.14</td>
-            </tr>
-            <tr>
-              <td>MAGI-1-4.5B</td>
-              <td>0.21</td>
-              <td>0.38</td>
-              <td>0.38</td>
-              <td>0.50</td>
-              <td>0.52</td>
-              <td>0.01</td>
-            </tr>
-            <tr>
-              <td rowspan="5">I2V</td>
-              <td>Cosmos2.5-2B</td>
-              <td>0.61</td>
-              <td>0.51</td>
-              <td>0.44</td>
-              <td>0.57</td>
-              <td>0.66</td>
-              <td>0.12</td>
-            </tr>
-            <tr>
-              <td>Cosmos2.5-14B</td>
-              <td>0.51</td>
-              <td>0.47</td>
-              <td>0.44</td>
-              <td>0.56</td>
-              <td>0.67</td>
-              <td>0.08</td>
-            </tr>
-            <tr>
-              <td>MAGI-1-4.5B</td>
-              <td>0.19</td>
-              <td>0.40</td>
-              <td>0.46</td>
-              <td>0.52</td>
-              <td>0.54</td>
-              <td>0.02</td>
-            </tr>
-            <tr>
-              <td>CogVideoX1.5-5B</td>
-              <td>0.39</td>
-              <td>0.29</td>
-              <td>0.33</td>
-              <td>0.40</td>
-              <td>0.58</td>
-              <td>0.02</td>
-            </tr>
-            <tr>
-              <td>Wan2.2-14B</td>
-              <td>0.76</td>
-              <td>0.59</td>
-              <td><strong>0.52</strong></td>
-              <td><strong>0.72</strong></td>
-              <td><strong>0.73</strong></td>
-              <td>0.20</td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="results-layout">
+        <div class="table-wrap">
+          <table class="results-table results-table--compact" id="results-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Model</th>
+                <th>Mode</th>
+                <th>Success</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="results-row is-active" data-model-id="cosmos2b_v2v"
+                  data-metrics="0.22,0.77,0.60,0.49,0.63,0.71"
+                  data-label="Cosmos2.5-2B"
+                  data-color="#22c55e">
+                <td>1</td>
+                <td><span class="row-swatch" style="background:#22c55e"></span>Cosmos2.5-2B</td>
+                <td>V2V</td>
+                <td><strong>0.22</strong></td>
+              </tr>
+              <tr class="results-row is-active" data-model-id="wan14b_i2v"
+                  data-metrics="0.20,0.76,0.59,0.52,0.72,0.73"
+                  data-label="Wan2.2-14B"
+                  data-color="#f59e0b">
+                <td>2</td>
+                <td><span class="row-swatch" style="background:#f59e0b"></span>Wan2.2-14B</td>
+                <td>I2V</td>
+                <td>0.20</td>
+              </tr>
+              <tr class="results-row is-active" data-model-id="cosmos14b_v2v"
+                  data-metrics="0.14,0.55,0.52,0.46,0.59,0.68"
+                  data-label="Cosmos2.5-14B"
+                  data-color="#15803d">
+                <td>3</td>
+                <td><span class="row-swatch" style="background:#15803d"></span>Cosmos2.5-14B</td>
+                <td>V2V</td>
+                <td>0.14</td>
+              </tr>
+              <tr class="results-row is-active" data-model-id="cosmos2b_i2v"
+                  data-metrics="0.12,0.61,0.51,0.44,0.57,0.66"
+                  data-label="Cosmos2.5-2B"
+                  data-color="#86efac">
+                <td>4</td>
+                <td><span class="row-swatch" style="background:#86efac"></span>Cosmos2.5-2B</td>
+                <td>I2V</td>
+                <td>0.12</td>
+              </tr>
+              <tr class="results-row is-active" data-model-id="cosmos14b_i2v"
+                  data-metrics="0.08,0.51,0.47,0.44,0.56,0.67"
+                  data-label="Cosmos2.5-14B"
+                  data-color="#4ade80">
+                <td>5</td>
+                <td><span class="row-swatch" style="background:#4ade80"></span>Cosmos2.5-14B</td>
+                <td>I2V</td>
+                <td>0.08</td>
+              </tr>
+              <tr class="results-row is-active" data-model-id="magi_i2v"
+                  data-metrics="0.02,0.19,0.40,0.46,0.52,0.54"
+                  data-label="MAGI-1-4.5B"
+                  data-color="#60a5fa">
+                <td>6</td>
+                <td><span class="row-swatch" style="background:#60a5fa"></span>MAGI-1-4.5B</td>
+                <td>I2V</td>
+                <td>0.02</td>
+              </tr>
+              <tr class="results-row is-active" data-model-id="cogvideox_i2v"
+                  data-metrics="0.02,0.39,0.29,0.33,0.40,0.58"
+                  data-label="CogVideoX1.5-5B"
+                  data-color="#dc2626">
+                <td>6</td>
+                <td><span class="row-swatch" style="background:#dc2626"></span>CogVideoX1.5-5B</td>
+                <td>I2V</td>
+                <td>0.02</td>
+              </tr>
+              <tr class="results-row is-active" data-model-id="magi_v2v"
+                  data-metrics="0.01,0.21,0.38,0.38,0.50,0.52"
+                  data-label="MAGI-1-4.5B"
+                  data-color="#1d4ed8">
+                <td>8</td>
+                <td><span class="row-swatch" style="background:#1d4ed8"></span>MAGI-1-4.5B</td>
+                <td>V2V</td>
+                <td>0.01</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <figure class="radar-figure">
+          <div class="radar-wrap">
+            <canvas id="results-radar" aria-label="Per-metric radar chart"></canvas>
+          </div>
+          <figcaption>
+            Per-metric breakdown on a 0-1 scale. Higher is better on every axis.
+          </figcaption>
+        </figure>
       </div>
 
       <!-- ============ INTERACTIVE SENSITIVITY CHART ============
@@ -646,6 +649,28 @@
     </div>
   </section>
 
+  <!-- ============== ACKNOWLEDGMENTS ============== -->
+  <section class="section section--accent" id="acknowledgments">
+    <div class="container narrow">
+      <h2>Acknowledgments</h2>
+      <p>
+        AK acknowledges support via his Emmy Noether Research Group funded by the German Research
+        Foundation (DFG) under grant number 468670075.
+      </p>
+      <p>
+        This research was funded by the Deutsche Forschungsgemeinschaft (DFG, German Research
+        Foundation) under grant number 539134284, through EFRE (FEIH_2698644) and the state of
+        Baden-Württemberg.
+      </p>
+      <div class="ack-logos">
+        <img src="assets/images/BaWue_Logo_Standard_rgb_pos.png"
+             alt="Baden-Württemberg state logo" class="ack-logo" />
+        <img src="assets/images/EN-Co-funded-by-the-EU_POS.png"
+             alt="Co-funded by the European Union" class="ack-logo" />
+      </div>
+    </div>
+  </section>
+
   <!-- ============== BIBTEX ============== -->
   <section class="section" id="bibtex">
     <div class="container narrow">
@@ -658,6 +683,121 @@
 }</code></pre>
     </div>
   </section>
+
+  <!-- ============== RESULTS RADAR (per-metric breakdown) ============== -->
+  <script>
+    (function () {
+      var canvas = document.getElementById('results-radar');
+      var table  = document.getElementById('results-table');
+      if (!canvas || !table || typeof Chart === 'undefined') return;
+
+      // Two-word labels are passed as arrays so Chart.js renders them on two lines.
+      // Shorter line lengths free up horizontal space inside the canvas, which the
+      // radial polygon then expands to fill.
+      var metricLabels = [
+        ['Success', 'Rate'],
+        ['Background', 'Stability'],
+        ['Motion', 'Similarity'],
+        ['Appearance', 'Stability'],
+        ['3D Shape', "Stability"],
+        ['Physical', 'Plausibility']
+      ];
+
+      // Hex → "rgba(r,g,b,a)" — used so we can draw a faint fill under each polygon.
+      function hexToRgba(hex, alpha) {
+        var h = hex.replace('#', '');
+        if (h.length === 3) { h = h.split('').map(function (c) { return c + c; }).join(''); }
+        var r = parseInt(h.slice(0, 2), 16);
+        var g = parseInt(h.slice(2, 4), 16);
+        var b = parseInt(h.slice(4, 6), 16);
+        return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+      }
+
+      // Build one Chart.js dataset per table row, preserving row order.
+      var rows = Array.prototype.slice.call(table.querySelectorAll('tr.results-row'));
+      var datasets = rows.map(function (row) {
+        var color  = row.getAttribute('data-color');
+        var values = row.getAttribute('data-metrics').split(',').map(parseFloat);
+        return {
+          label: row.getAttribute('data-label'),
+          data: values,
+          borderColor: color,
+          backgroundColor: hexToRgba(color, 0.12),
+          pointBackgroundColor: color,
+          pointBorderColor: '#fff',
+          pointBorderWidth: 1.5,
+          pointRadius: 3.5,
+          pointHoverRadius: 5,
+          borderWidth: 2,
+          hidden: false,
+          _rowEl: row
+        };
+      });
+
+      var chart = new Chart(canvas, {
+        type: 'radar',
+        data: { labels: metricLabels, datasets: datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 350, easing: 'easeOutQuart' },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(15, 23, 42, 0.95)',
+              titleColor: '#fff',
+              bodyColor: '#e2e8f0',
+              titleFont: { family: 'Inter, sans-serif', weight: '600', size: 13 },
+              bodyFont:  { family: 'Inter, sans-serif', size: 12 },
+              padding: 10,
+              cornerRadius: 8,
+              callbacks: {
+                label: function (ctx) {
+                  return ' ' + ctx.dataset.label + ': ' + ctx.parsed.r.toFixed(2);
+                }
+              }
+            }
+          },
+          scales: {
+            r: {
+              beginAtZero: true,
+              min: 0,
+              max: 1,
+              ticks: {
+                stepSize: 0.2,
+                showLabelBackdrop: false,
+                color: '#8b93a3',
+                font: { family: 'Inter, sans-serif', size: 11 }
+              },
+              pointLabels: {
+                color: '#1a1d23',
+                font: { family: 'Inter, sans-serif', size: 15, weight: '600' }
+              },
+              grid:        { color: 'rgba(15, 23, 42, 0.08)' },
+              angleLines:  { color: 'rgba(15, 23, 42, 0.08)' }
+            }
+          }
+        }
+      });
+
+      // Clicking a row toggles its dataset on the radar.
+      rows.forEach(function (row, idx) {
+        row.addEventListener('click', function () {
+          var ds = chart.data.datasets[idx];
+          ds.hidden = !ds.hidden;
+          row.classList.toggle('is-hidden', ds.hidden);
+          row.classList.toggle('is-active', !ds.hidden);
+          chart.update();
+        });
+      });
+
+      // Re-measure once webfonts settle (Safari can paint with the fallback first).
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(function () { chart.resize(); chart.update('none'); });
+      }
+      window.addEventListener('load', function () { chart.resize(); });
+    })();
+  </script>
 
   <!-- ============== INTERACTIVE SENSITIVITY CHART ============== -->
   <script>

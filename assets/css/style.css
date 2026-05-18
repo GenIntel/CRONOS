@@ -554,6 +554,65 @@ code {
 .results-table tbody tr:hover { background: #fafbfd; }
 .results-table strong { color: var(--primary); }
 
+/* Side-by-side: table on the left, radar (wider) on the right */
+.results-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.55fr);
+  gap: 24px;
+  align-items: start;
+  margin: 16px 0;
+}
+.results-layout .table-wrap { margin: 0; }
+
+/* Compact variant: tighter padding so the 4-column table sits nicely beside the radar */
+.results-table--compact th,
+.results-table--compact td {
+  padding: 10px 12px;
+}
+
+/* Clickable row affordance + colored swatch */
+.results-row { cursor: pointer; transition: background 0.15s ease, opacity 0.15s ease; }
+.results-row.is-hidden { opacity: 0.42; }
+.results-row.is-hidden td { color: #9aa1ad; }
+.results-row.is-hidden .row-swatch { background: #cfd4dd !important; }
+.results-row.is-hidden strong { color: #9aa1ad; }
+.row-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.12) inset;
+}
+
+/* Radar pane */
+.radar-figure {
+  margin: 0;
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 16px 18px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.radar-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  min-height: 560px;
+}
+.radar-figure figcaption {
+  font-size: 0.85rem;
+  color: #5a6072;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .results-layout { grid-template-columns: 1fr; }
+}
+
 /* ===== Selector (button group) ===== */
 .selector {
   display: flex;
@@ -820,6 +879,26 @@ code {
 }
 .limitations-list li:last-child { border-bottom: none; }
 .limitations-list strong { color: var(--text); }
+
+/* ===== Acknowledgments ===== */
+.ack-logos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 48px;
+  margin: 32px 0 8px;
+}
+.ack-logo {
+  max-width: 30%;
+  height: auto;
+  max-height: 90px;
+  object-fit: contain;
+}
+@media (max-width: 560px) {
+  .ack-logos { gap: 28px; }
+  .ack-logo { max-width: 45%; }
+}
 
 /* ===== BibTeX ===== */
 .bibtex {
