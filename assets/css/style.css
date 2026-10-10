@@ -152,6 +152,9 @@ code {
   width: 100%;
   display: block;
 }
+.teaser-media--after-abstract { margin: 36px auto 0; }
+.teaser-figure { margin: 8px auto 0; max-width: var(--max-width); }
+.teaser-figure figcaption { text-align: center; }
 .teaser-caption {
   max-width: var(--max-width-narrow);
   margin: 0 auto;
@@ -457,12 +460,17 @@ code {
 /* ===== Findings Grid (2×2) ===== */
 .findings-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 22px;
   margin: 16px 0 48px;
 }
-@media (max-width: 720px) {
+/* Five findings: three on the first row, two centred on the second, all the same width */
+.finding-card { grid-column: span 2; }
+.finding-card:nth-child(4) { grid-column: 2 / span 2; }
+@media (max-width: 960px) {
   .findings-grid { grid-template-columns: 1fr; }
+  .finding-card,
+  .finding-card:nth-child(4) { grid-column: auto; }
 }
 .finding-card {
   background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
@@ -557,7 +565,7 @@ code {
 /* Side-by-side: table on the left, radar (wider) on the right */
 .results-layout {
   display: grid;
-  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.55fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
   gap: 24px;
   align-items: start;
   margin: 16px 0;
@@ -569,6 +577,7 @@ code {
 .results-table--compact td {
   padding: 10px 12px;
 }
+.results-table--compact td { white-space: nowrap; }
 
 /* Clickable row affordance + colored swatch */
 .results-row { cursor: pointer; transition: background 0.15s ease, opacity 0.15s ease; }
@@ -610,7 +619,7 @@ code {
 }
 
 @media (max-width: 900px) {
-  .results-layout { grid-template-columns: 1fr; }
+  .results-layout { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* ===== Selector (button group) ===== */
@@ -654,6 +663,11 @@ code {
   justify-content: center;
   gap: 8px;
   min-width: max-content;       /* force the row to extend to its full content */
+}
+/* On narrow screens the rows wrap instead of pushing the page wider than the viewport */
+@media (max-width: 720px) {
+  .selector[data-selector="model"] { width: 100%; padding: 14px 12px; }
+  .selector-row { flex-wrap: wrap; min-width: 0; }
 }
 .mode-tag {
   display: inline-flex;
@@ -742,7 +756,7 @@ code {
 /* ===== Qualitative Grid (3×3 model comparison) ===== */
 .qualitative-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 18px;
   margin: 24px 0 40px;
 }
@@ -754,6 +768,12 @@ code {
 .qualitative-cell .video-slot {
   aspect-ratio: 16 / 9;
   width: 100%;
+}
+/* Ground-truth render takes a 2×2 block in the top-left corner */
+.qualitative-cell--gt {
+  grid-column: span 2;
+  grid-row: span 2;
+  justify-content: center;
 }
 .qualitative-cell .cell-label {
   display: flex;
@@ -799,6 +819,7 @@ code {
 }
 @media (max-width: 560px) {
   .qualitative-grid { grid-template-columns: 1fr; }
+  .qualitative-cell--gt { grid-column: auto; grid-row: auto; }
 }
 
 /* ===== Counterfactual Grid (Original | 2×2 variants) ===== */

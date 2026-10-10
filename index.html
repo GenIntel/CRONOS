@@ -9,7 +9,7 @@
   <!-- Open Graph -->
   <meta property="og:title" content="CRONOS: Benchmarking Counterfactual Physical Consistency in Video Models" />
   <meta property="og:description" content="An intervention-based benchmark for evaluating counterfactual physical consistency in video generation models." />
-  <meta property="og:image" content="assets/images/teaser.png" />
+  <meta property="og:image" content="assets/images/teaser.svg" />
   <meta property="og:type" content="website" />
 
   <link rel="stylesheet" href="assets/css/style.css" />
@@ -31,12 +31,11 @@
       <div class="authors">
         <span class="author">León Begiristain<sup>1</sup></span>
         <span class="author">Olaf Dünkel<sup>2</sup></span>
-        <span class="author">Adam Kortylewski<sup>3</sup></span>
+        <span class="author">Adam Kortylewski<sup>1</sup></span>
       </div>
       <div class="affiliations">
         <span><sup>1</sup>University of Freiburg, Germany</span>
         <span><sup>2</sup>Max Planck Institute for Informatics, Saarland Informatics Campus, Germany</span>
-        <span><sup>3</sup>CISPA Helmholtz Center for Information Security, Germany</span>
       </div>
 
       <!-- Action buttons -->
@@ -55,12 +54,15 @@
         </a>
       </nav>
 
-      <!-- ============ TEASER VIDEO with controls ============ -->
-      <div class="teaser-media">
-        <video controls poster="assets/images/video_frame.png" class="teaser-video">
-          <source src="assets/videos/CRONOS.mov" type="video/mp4">
-        </video>
-      </div>
+      <!-- ============ TEASER FIGURE ============ -->
+      <figure class="figure teaser-figure">
+        <img src="assets/images/teaser.svg" alt="CRONOS benchmark overview: three physical events with multiple futures, four visual interventions (object, appearance, viewpoint, scene), and evaluation of physical understanding and sensitivity to interventions." class="figure-image" />
+        <figcaption>
+          <strong>Figure 1.</strong> The CRONOS benchmark evaluates counterfactual physical consistency:
+          whether a model's predictions of physical events respond appropriately to controlled changes
+          in the visual input.
+        </figcaption>
+      </figure>
     </div>
   </header>
 
@@ -69,21 +71,33 @@
     <div class="container wide">
       <h2>Abstract</h2>
       <p>
-        We introduce <strong>CRONOS</strong>,
-        an intervention-based benchmark designed to evaluate <em>counterfactual physical consistency</em>:
-        whether a model's predictions of physical events respond appropriately to controlled changes
-        in the visual input, such as variations of scene context, viewpoint, object appearance, and
-        object category. Built in a photorealistic Unreal Engine environment, CRONOS enables
-        controlled, high-fidelity generation of videos across diverse scenes and dynamics. Unlike
-        prior benchmarks that evaluate video prediction on fixed scenes, CRONOS systematically
-        intervenes on four key factors while keeping the underlying physical event — such as a
-        collision, occlusion, or fall — fixed. Our evaluation of recent open-source video generators reveals <strong>substantial failures
-        in counterfactual physical consistency</strong>: prediction quality for the same physical
-        event is affected by appearance, environment, and particularly by viewpoint changes. CRONOS
-        provides a principled and reproducible testbed for diagnosing how generated video quality
+        Video prediction is increasingly viewed as a path toward generalizable world models, yet it
+        remains unclear whether these systems learn underlying causal structure or merely exploit
+        superficial visual correlations for future prediction.
+        We introduce <strong>CRONOS</strong>, an intervention-based benchmark to evaluate
+        <em>counterfactual physical consistency</em>: whether a model's predictions of physical events
+        respond appropriately to controlled changes in the visual input, such as variations of camera
+        viewpoint, scene, object category, and object appearance.
+        Built in a photorealistic Unreal Engine environment, CRONOS enables controlled, high-fidelity
+        generation of videos across diverse scenes and dynamics, including sampling
+        <strong>multiple physically plausible outcomes</strong> of the same physical event.
+        In contrast to previous benchmarks, CRONOS systematically intervenes on four factors — camera
+        viewpoint, scene, object category, and object appearance — while keeping the underlying
+        physical event type, such as a fall, collision, or occlusion, fixed.
+        Our evaluation of recent open-source video generators reveals <strong>substantial failures in
+        counterfactual physical consistency</strong>: prediction quality for the same physical event
+        type is affected by appearance, environment, and particularly viewpoint changes. CRONOS
+        provides a controlled and reproducible testbed for diagnosing how generated video quality
         changes across interventions, establishing a concrete target for developing models that
         perform consistently across changes of multiple conditions.
       </p>
+
+      <!-- ============ TEASER VIDEO with controls ============ -->
+      <div class="teaser-media teaser-media--after-abstract">
+        <video controls poster="assets/images/video_frame.png" class="teaser-video">
+          <source src="assets/videos/CRONOS.mov" type="video/mp4">
+        </video>
+      </div>
     </div>
   </section>
 
@@ -110,15 +124,6 @@
         Each physical event is rendered into multiple counterfactual observations by intervening on
         one scene factor at a time while holding all others fixed.
       </p>
-
-      <!-- ============ FIGURE 1: PIPELINE / OVERVIEW ============ -->
-      <figure class="figure">
-        <img src="assets/images/pipeline.png" alt="CRONOS benchmark overview: counterfactual interventions on viewpoint, scene, appearance, and object category." class="figure-image" />
-        <figcaption>
-          <strong>Figure 1.</strong> The CRONOS benchmark systematically intervenes on visual factors
-          while preserving the underlying physical event, isolating each axis of model sensitivity.
-        </figcaption>
-      </figure>
 
       <!-- =============== THREE PHYSICAL EVENTS =============== -->
       <h3>Physical Events</h3>
@@ -151,10 +156,23 @@
             <video autoplay muted loop playsinline class="figure-image"><source src="assets/videos/event_occlusion.mp4" type="video/mp4"></video>
           </div>
           <h4>Occlusion</h4>
-          <p>An object becomes fully occluded behind a scene element and later reappears —
-            probing long-range temporal coherence and inference of hidden motion.</p>
+          <p>An object rolling across a smooth surface becomes fully occluded behind another object
+            and later reappears — testing whether models capture long-range temporal coherence.</p>
         </div>
       </div>
+
+      <!-- =============== MULTIPLE ROLLOUTS =============== -->
+      <h3>Multiple Plausible Futures</h3>
+      <p>
+        Physical parameters such as mass, elasticity, or friction cannot be inferred uniquely from one
+        or a few conditioning frames, so a single "correct" future would unfairly penalize models.
+        CRONOS therefore renders <strong>three rollouts of every sequence</strong> from the same
+        conditioning signal, using a high, medium, and low value of a key physical parameter:
+        the moving object's mass (collision), elasticity (fall), and friction (occlusion).
+        During evaluation, each generated video is compared against all rollouts and scored against
+        the best match. In total, the benchmark contains <strong>2,025 videos</strong>
+        (900 fall, 900 collision, 225 occlusion).
+      </p>
 
       <!-- =============== FOUR INTERVENTIONS =============== -->
       <h3>Systematic Visual Interventions</h3>
@@ -220,10 +238,15 @@
         <div class="metric-item"><strong>Background Stability</strong> — perturbations in environment over time, camera movement and appearance of new objects.</div>
         <div class="metric-item"><strong>Appearance Stability</strong> — consistency of object appearance over time.</div>
         <div class="metric-item"><strong>3D-Shape Stability</strong> — geometric consistency of objects throughout the video.</div>
-        <div class="metric-item"><strong>Motion Similarity</strong> — motion agreement with reference rendered video.</div>
+        <div class="metric-item"><strong>Motion Similarity</strong> — appearance-invariant motion agreement with the best-matching rendered rollout.</div>
         <div class="metric-item"><strong>Physical Plausibility</strong> — VLM-as-judge (Qwen3-VL-32B) over physics-specific questions.</div>
-        <div class="metric-item"><strong>Success Rate</strong> — binary pass/fail aggregation with human-calibrated thresholds.</div>
+        <div class="metric-item"><strong>Success Rate</strong> — a video passes only if every metric clears its human-calibrated threshold and no object disappears.</div>
       </div>
+      <p>
+        To measure counterfactual consistency, we compute each model's <strong>sensitivity to
+        interventions</strong>: how much these metrics change under an intervention, relative to
+        resampling the seed.
+      </p>
     </div>
   </section>
 
@@ -232,8 +255,9 @@
     <div class="container">
       <h2>Key Findings</h2>
       <p class="lead">
-        We evaluate Cosmos2.5 (2B, 14B), CogVideoX1.5 (5B), MAGI-1 (4.5B), and Wan2.2 (14B)
-        across both I2V and V2V settings.
+        We evaluate Cosmos2.5 (2B, 14B), Cosmos3-Super, CogVideoX1.5 (5B), MAGI-1 (4.5B),
+        Wan2.2 (14B), HunyuanVideo-1.5, and MiniMax-H3 in the I2V setting, and Cosmos and MAGI-1
+        additionally in the V2V setting.
       </p>
 
       <div class="findings-grid">
@@ -241,39 +265,49 @@
           <div class="finding-number">01</div>
           <h3>Models fail at basic rigid-body physics</h3>
           <p>
-            All evaluated video models fail to reliably generate short clips of basic
-            rigid-body physics. Even the strongest model (<strong>Cosmos2.5-2B V2V</strong>) achieves
-            only a <strong>22% success rate</strong>, with some models below 5%.
+            All evaluated open-source video models struggle to reliably generate short clips of basic
+            rigid-body physics. Even the strongest model (<strong>MiniMax-H3</strong>) achieves
+            only a <strong>36% success rate</strong>, with most models below 20%.
           </p>
         </div>
 
         <div class="finding-card">
           <div class="finding-number">02</div>
-          <h3>No model is counterfactually consistent</h3>
+          <h3>Visual stability &ne; physical correctness</h3>
           <p>
-            Generation quality substantially shifts under every intervention — including superficial
-            appearance changes, and <strong>particularly under viewpoint, object-type, and scene
-            interventions</strong>. <!--Models encode predictions in view-dependent ways.-->
+            Models that generate stable backgrounds and objects can still fail to produce the expected
+            physical event. On falling objects, Wan2.2 has the best background stability and motion
+            similarity, yet its <strong>physical plausibility falls below the calibrated threshold</strong>.
           </p>
         </div>
 
         <div class="finding-card">
           <div class="finding-number">03</div>
-          <h3>Video conditioning helps beyond motion</h3>
+          <h3>No model is counterfactually consistent</h3>
           <p>
-            V2V outperforms I2V not only on motion fidelity (as expected) but also on
-            <strong>background and object stability</strong>, suggesting additional conditioning
-            frames help form more stable internal representations at inference time.
+            Generation quality changes substantially across interventions, <strong>especially for
+            scene and viewpoint changes</strong>. The models with the highest success rates are
+            generally the least sensitive (Spearman &rho; = &minus;0.87).
           </p>
         </div>
 
         <div class="finding-card">
           <div class="finding-number">04</div>
+          <h3>Video conditioning helps beyond motion</h3>
+          <p>
+            V2V improves not only motion fidelity (as expected) but also <strong>background and
+            object stability</strong> and the <strong>consistency of generation quality across
+            interventions</strong>.
+          </p>
+        </div>
+
+        <div class="finding-card">
+          <div class="finding-number">05</div>
           <h3>Scaling alone is not enough</h3>
           <p>
-            Scaling Cosmos from 2B to 14B parameters yields <strong>no improvement</strong> on
-            physical event generation. Model size alone does not guarantee better counterfactual
-            physical consistency.
+            Scaling Cosmos2.5 from 2B to 14B parameters improves <strong>neither generation quality
+            nor consistency</strong> under interventions (V2V success drops from 23% to 14%). Model
+            size alone does not guarantee counterfactual physical consistency.
           </p>
         </div>
       </div>
@@ -284,7 +318,8 @@
         Performance averaged across all videos. The table reports the headline
         <strong>Success</strong> rate; per-metric scores (background stability, motion similarity,
         appearance stability, 3D shape, physical plausibility) are plotted in the radar on the right
-        — all axes on a 0-1 scale. <em>Click a row to toggle that model on or off in the radar.</em>
+        — all axes on a 0-1 scale. Solid lines are V2V, dashed lines I2V; by default the radar shows
+        the best mode of each model. <em>Click a row to toggle that model on or off in the radar.</em>
       </p>
 
       <div class="results-layout">
@@ -299,75 +334,123 @@
               </tr>
             </thead>
             <tbody>
-              <tr class="results-row is-active" data-model-id="cosmos2b_v2v"
-                  data-metrics="0.22,0.77,0.60,0.49,0.63,0.71"
-                  data-label="Cosmos2.5-2B"
-                  data-color="#22c55e">
+              <tr class="results-row is-active" data-model-id="minimaxh3_i2v"
+                  data-metrics="0.36,0.61,0.55,0.62,0.75,0.91"
+                  data-label="MiniMax-H3 (I2V)"
+                  data-mode="i2v"
+                  data-color="#fd4848">
                 <td>1</td>
-                <td><span class="row-swatch" style="background:#22c55e"></span>Cosmos2.5-2B</td>
+                <td><span class="row-swatch" style="border:2px solid #fd4848;background:#fff"></span>MiniMax-H3</td>
+                <td>I2V</td>
+                <td><strong>0.36</strong></td>
+              </tr>
+              <tr class="results-row is-active" data-model-id="cosmos3_v2v"
+                  data-metrics="0.30,0.80,0.68,0.54,0.71,0.92"
+                  data-label="Cosmos3-Super (V2V)"
+                  data-mode="v2v"
+                  data-color="#125b3c">
+                <td>2</td>
+                <td><span class="row-swatch" style="background:#125b3c"></span>Cosmos3-Super</td>
                 <td>V2V</td>
-                <td><strong>0.22</strong></td>
+                <td>0.30</td>
+              </tr>
+              <tr class="results-row is-active" data-model-id="cosmos2b_v2v"
+                  data-metrics="0.23,0.77,0.64,0.53,0.67,0.71"
+                  data-label="Cosmos2.5-2B (V2V)"
+                  data-mode="v2v"
+                  data-color="#37c789">
+                <td>3</td>
+                <td><span class="row-swatch" style="background:#37c789"></span>Cosmos2.5-2B</td>
+                <td>V2V</td>
+                <td>0.23</td>
               </tr>
               <tr class="results-row is-active" data-model-id="wan14b_i2v"
-                  data-metrics="0.20,0.76,0.59,0.52,0.72,0.73"
-                  data-label="Wan2.2-14B"
-                  data-color="#f59e0b">
-                <td>2</td>
-                <td><span class="row-swatch" style="background:#f59e0b"></span>Wan2.2-14B</td>
+                  data-metrics="0.20,0.76,0.60,0.54,0.73,0.73"
+                  data-label="Wan2.2-14B (I2V)"
+                  data-mode="i2v"
+                  data-color="#ffb109">
+                <td>4</td>
+                <td><span class="row-swatch" style="border:2px solid #ffb109;background:#fff"></span>Wan2.2-14B</td>
                 <td>I2V</td>
                 <td>0.20</td>
               </tr>
-              <tr class="results-row is-active" data-model-id="cosmos14b_v2v"
-                  data-metrics="0.14,0.55,0.52,0.46,0.59,0.68"
-                  data-label="Cosmos2.5-14B"
-                  data-color="#15803d">
-                <td>3</td>
-                <td><span class="row-swatch" style="background:#15803d"></span>Cosmos2.5-14B</td>
+              <tr class="results-row is-hidden" data-model-id="cosmos3_i2v"
+                  data-metrics="0.19,0.71,0.63,0.50,0.70,0.91"
+                  data-label="Cosmos3-Super (I2V)"
+                  data-mode="i2v"
+                  data-color="#125b3c">
+                <td>5</td>
+                <td><span class="row-swatch" style="border:2px solid #125b3c;background:#fff"></span>Cosmos3-Super</td>
+                <td>I2V</td>
+                <td>0.19</td>
+              </tr>
+              <tr class="results-row is-hidden" data-model-id="cosmos14b_v2v"
+                  data-metrics="0.14,0.55,0.56,0.51,0.64,0.67"
+                  data-label="Cosmos2.5-14B (V2V)"
+                  data-mode="v2v"
+                  data-color="#248f61">
+                <td>6</td>
+                <td><span class="row-swatch" style="background:#248f61"></span>Cosmos2.5-14B</td>
                 <td>V2V</td>
                 <td>0.14</td>
               </tr>
-              <tr class="results-row is-active" data-model-id="cosmos2b_i2v"
-                  data-metrics="0.12,0.61,0.51,0.44,0.57,0.66"
-                  data-label="Cosmos2.5-2B"
-                  data-color="#86efac">
-                <td>4</td>
-                <td><span class="row-swatch" style="background:#86efac"></span>Cosmos2.5-2B</td>
+              <tr class="results-row is-hidden" data-model-id="cosmos2b_i2v"
+                  data-metrics="0.12,0.60,0.56,0.50,0.63,0.66"
+                  data-label="Cosmos2.5-2B (I2V)"
+                  data-mode="i2v"
+                  data-color="#37c789">
+                <td>7</td>
+                <td><span class="row-swatch" style="border:2px solid #37c789;background:#fff"></span>Cosmos2.5-2B</td>
                 <td>I2V</td>
                 <td>0.12</td>
               </tr>
-              <tr class="results-row is-active" data-model-id="cosmos14b_i2v"
-                  data-metrics="0.08,0.51,0.47,0.44,0.56,0.67"
-                  data-label="Cosmos2.5-14B"
-                  data-color="#4ade80">
-                <td>5</td>
-                <td><span class="row-swatch" style="background:#4ade80"></span>Cosmos2.5-14B</td>
+              <tr class="results-row is-hidden" data-model-id="cosmos14b_i2v"
+                  data-metrics="0.08,0.52,0.52,0.49,0.60,0.67"
+                  data-label="Cosmos2.5-14B (I2V)"
+                  data-mode="i2v"
+                  data-color="#248f61">
+                <td>8</td>
+                <td><span class="row-swatch" style="border:2px solid #248f61;background:#fff"></span>Cosmos2.5-14B</td>
                 <td>I2V</td>
                 <td>0.08</td>
               </tr>
+              <tr class="results-row is-active" data-model-id="hunyuan1.5_i2v"
+                  data-metrics="0.06,0.69,0.50,0.52,0.61,0.48"
+                  data-label="HunyuanVideo-1.5 (I2V)"
+                  data-mode="i2v"
+                  data-color="#8362cd">
+                <td>9</td>
+                <td><span class="row-swatch" style="border:2px solid #8362cd;background:#fff"></span>HunyuanVideo-1.5</td>
+                <td>I2V</td>
+                <td>0.06</td>
+              </tr>
               <tr class="results-row is-active" data-model-id="magi_i2v"
-                  data-metrics="0.02,0.19,0.40,0.46,0.52,0.54"
-                  data-label="MAGI-1-4.5B"
-                  data-color="#60a5fa">
-                <td>6</td>
-                <td><span class="row-swatch" style="background:#60a5fa"></span>MAGI-1-4.5B</td>
+                  data-metrics="0.02,0.21,0.46,0.51,0.57,0.54"
+                  data-label="MAGI-1-4.5B (I2V)"
+                  data-mode="i2v"
+                  data-color="#c0571e">
+                <td>10</td>
+                <td><span class="row-swatch" style="border:2px solid #c0571e;background:#fff"></span>MAGI-1-4.5B</td>
                 <td>I2V</td>
                 <td>0.02</td>
               </tr>
               <tr class="results-row is-active" data-model-id="cogvideox_i2v"
-                  data-metrics="0.02,0.39,0.29,0.33,0.40,0.58"
-                  data-label="CogVideoX1.5-5B"
-                  data-color="#dc2626">
-                <td>6</td>
-                <td><span class="row-swatch" style="background:#dc2626"></span>CogVideoX1.5-5B</td>
+                  data-metrics="0.02,0.39,0.35,0.40,0.49,0.58"
+                  data-label="CogVideoX1.5-5B (I2V)"
+                  data-mode="i2v"
+                  data-color="#30a8ef">
+                <td>10</td>
+                <td><span class="row-swatch" style="border:2px solid #30a8ef;background:#fff"></span>CogVideoX1.5-5B</td>
                 <td>I2V</td>
                 <td>0.02</td>
               </tr>
-              <tr class="results-row is-active" data-model-id="magi_v2v"
-                  data-metrics="0.01,0.21,0.38,0.38,0.50,0.52"
-                  data-label="MAGI-1-4.5B"
-                  data-color="#1d4ed8">
-                <td>8</td>
-                <td><span class="row-swatch" style="background:#1d4ed8"></span>MAGI-1-4.5B</td>
+              <tr class="results-row is-hidden" data-model-id="magi_v2v"
+                  data-metrics="0.01,0.22,0.47,0.47,0.58,0.51"
+                  data-label="MAGI-1-4.5B (V2V)"
+                  data-mode="v2v"
+                  data-color="#c0571e">
+                <td>12</td>
+                <td><span class="row-swatch" style="background:#c0571e"></span>MAGI-1-4.5B</td>
                 <td>V2V</td>
                 <td>0.01</td>
               </tr>
@@ -387,7 +470,7 @@
 
       <!-- ============ INTERACTIVE SENSITIVITY CHART ============
            Values in `sensitivityData` (script block at the bottom of the file) are
-           read off the paper's Figure 5. Edit them there if the final numbers differ. -->
+           taken from the paper's sensitivity figure. Edit them there if the numbers change. -->
       <figure class="figure sensitivity-figure">
         <div class="chart-controls">
           <div class="chart-toggle" role="tablist" aria-label="Conditioning mode">
@@ -403,8 +486,9 @@
         </div>
         <figcaption>
           <strong>Figure 2.</strong> Sensitivity to counterfactual interventions averaged across
-          metrics. Lower is better. All models show substantial sensitivity across every intervention
-          type, including superficial appearance changes.
+          metrics. Lower is better: values below 1 mean an intervention changes generation quality less
+          than resampling the seed, values above 1 mean it changes it more. All models show substantial
+          variation across intervention types, especially for scene and viewpoint changes.
         </figcaption>
       </figure>
     </div>
@@ -427,16 +511,16 @@
         <button class="selector-btn" data-value="occlusion">Occlusion</button>
       </div>
 
-      <!-- ============ MODEL COMPARISON GRID (3×3) ============
-           Files expected: assets/videos/qual_{event}_{model}.mp4
+      <!-- ============ MODEL COMPARISON GRID (4×4, GT render spans 2×2) ============
+           Files expected: assets/videos/{model}_{event}.mp4
            Where {model} is one of:
-             render, cosmos2b_v2v, cosmos14b_v2v, magi_v2v,
-             cosmos2b_i2v, cosmos14b_i2v, magi_i2v, cogvideox_i2v, wan_i2v
-           Example: qual_collision_cosmos14b_v2v.mp4 -->
+             render, minimaxh3_i2v, cosmos3_v2v, cosmos3_i2v, cosmos2b_v2v, cosmos2b_i2v,
+             cosmos14b_v2v, cosmos14b_i2v, magi4.5b_v2v, magi4.5b_i2v, cog5b_i2v,
+             wan14b_i2v, hunyuan1.5_i2v
+           Example: cosmos3_v2v_collision.mp4. Models are ordered by success rate. -->
       <div class="qualitative-grid" id="qual-grid" data-template="assets/videos/{model}_{event}.mp4">
 
-        <!-- Row 1 -->
-        <div class="qualitative-cell">
+        <div class="qualitative-cell qualitative-cell--gt">
           <div class="cell-label">Render <span class="cell-tag tag-gt">GT</span></div>
           <div class="video-slot" data-model="render">
             <video autoplay muted loop playsinline preload="metadata"></video>
@@ -446,10 +530,9 @@
             </div>
           </div>
         </div>
-
         <div class="qualitative-cell">
-          <div class="cell-label">Wan2.2-14B <span class="cell-tag tag-i2v">I2V</span></div>
-          <div class="video-slot" data-model="wan14b_i2v">
+          <div class="cell-label">MiniMax-H3 <span class="cell-tag tag-i2v">I2V</span></div>
+          <div class="video-slot" data-model="minimaxh3_i2v">
             <video autoplay muted loop playsinline preload="metadata"></video>
             <div class="media-placeholder media-placeholder--video">
               <span class="placeholder-icon">🎥</span>
@@ -457,7 +540,16 @@
             </div>
           </div>
         </div>
-
+        <div class="qualitative-cell">
+          <div class="cell-label">Cosmos3-Super <span class="cell-tag tag-v2v">V2V</span></div>
+          <div class="video-slot" data-model="cosmos3_v2v">
+            <video autoplay muted loop playsinline preload="metadata"></video>
+            <div class="media-placeholder media-placeholder--video">
+              <span class="placeholder-icon">🎥</span>
+              <span class="placeholder-hint"></span>
+            </div>
+          </div>
+        </div>
         <div class="qualitative-cell">
           <div class="cell-label">Cosmos2.5-2B <span class="cell-tag tag-v2v">V2V</span></div>
           <div class="video-slot" data-model="cosmos2b_v2v">
@@ -469,8 +561,8 @@
           </div>
         </div>
         <div class="qualitative-cell">
-          <div class="cell-label">Cosmos2.5-14B <span class="cell-tag tag-v2v">V2V</span></div>
-          <div class="video-slot" data-model="cosmos14b_v2v">
+          <div class="cell-label">Wan2.2-14B <span class="cell-tag tag-i2v">I2V</span></div>
+          <div class="video-slot" data-model="wan14b_i2v">
             <video autoplay muted loop playsinline preload="metadata"></video>
             <div class="media-placeholder media-placeholder--video">
               <span class="placeholder-icon">🎥</span>
@@ -478,11 +570,19 @@
             </div>
           </div>
         </div>
-
-        <!-- Row 2 -->
         <div class="qualitative-cell">
-          <div class="cell-label">MAGI-1-4.5B <span class="cell-tag tag-v2v">V2V</span></div>
-          <div class="video-slot" data-model="magi4.5b_v2v">
+          <div class="cell-label">Cosmos3-Super <span class="cell-tag tag-i2v">I2V</span></div>
+          <div class="video-slot" data-model="cosmos3_i2v">
+            <video autoplay muted loop playsinline preload="metadata"></video>
+            <div class="media-placeholder media-placeholder--video">
+              <span class="placeholder-icon">🎥</span>
+              <span class="placeholder-hint"></span>
+            </div>
+          </div>
+        </div>
+        <div class="qualitative-cell">
+          <div class="cell-label">Cosmos2.5-14B <span class="cell-tag tag-v2v">V2V</span></div>
+          <div class="video-slot" data-model="cosmos14b_v2v">
             <video autoplay muted loop playsinline preload="metadata"></video>
             <div class="media-placeholder media-placeholder--video">
               <span class="placeholder-icon">🎥</span>
@@ -510,8 +610,16 @@
             </div>
           </div>
         </div>
-
-        <!-- Row 3 -->
+        <div class="qualitative-cell">
+          <div class="cell-label">HunyuanVideo-1.5 <span class="cell-tag tag-i2v">I2V</span></div>
+          <div class="video-slot" data-model="hunyuan1.5cfgd_i2v">
+            <video autoplay muted loop playsinline preload="metadata"></video>
+            <div class="media-placeholder media-placeholder--video">
+              <span class="placeholder-icon">🎥</span>
+              <span class="placeholder-hint"></span>
+            </div>
+          </div>
+        </div>
         <div class="qualitative-cell">
           <div class="cell-label">MAGI-1-4.5B <span class="cell-tag tag-i2v">I2V</span></div>
           <div class="video-slot" data-model="magi4.5b_i2v">
@@ -532,7 +640,16 @@
             </div>
           </div>
         </div>
-
+        <div class="qualitative-cell">
+          <div class="cell-label">MAGI-1-4.5B <span class="cell-tag tag-v2v">V2V</span></div>
+          <div class="video-slot" data-model="magi4.5b_v2v">
+            <video autoplay muted loop playsinline preload="metadata"></video>
+            <div class="media-placeholder media-placeholder--video">
+              <span class="placeholder-icon">🎥</span>
+              <span class="placeholder-hint"></span>
+            </div>
+          </div>
+        </div>
 
       </div>
 
@@ -543,14 +660,22 @@
         all variants.
       </p>
 
-      <!-- ============ MODEL SELECTOR (3 V2V + 5 I2V) ============ -->
+      <!-- ============ MODEL SELECTOR (4 V2V + 8 I2V) ============ -->
       <div class="selector" data-selector="model" data-target="cf-grid">
         <span class="selector-label">Model:</span>
         <div class="selector-row">
           <span class="mode-tag tag-v2v">V2V</span>
+          <button class="selector-btn" data-value="cosmos3_v2v">Cosmos3-Super</button>
           <button class="selector-btn is-active" data-value="cosmos2b_v2v">Cosmos2.5-2B</button>
           <button class="selector-btn" data-value="cosmos14b_v2v">Cosmos2.5-14B</button>
           <button class="selector-btn" data-value="magi4.5b_v2v">MAGI-1-4.5B</button>
+        </div>
+        <div class="selector-row">
+          <span class="mode-tag tag-i2v">I2V</span>
+          <button class="selector-btn" data-value="minimaxh3_i2v">MiniMax-H3</button>
+          <button class="selector-btn" data-value="cosmos3_i2v">Cosmos3-Super</button>
+          <button class="selector-btn" data-value="wan14b_i2v">Wan2.2-14B</button>
+          <button class="selector-btn" data-value="hunyuan1.5cfgd_i2v">HunyuanVideo-1.5</button>
         </div>
         <div class="selector-row">
           <span class="mode-tag tag-i2v">I2V</span>
@@ -558,13 +683,13 @@
           <button class="selector-btn" data-value="cosmos14b_i2v">Cosmos2.5-14B</button>
           <button class="selector-btn" data-value="magi4.5b_i2v">MAGI-1-4.5B</button>
           <button class="selector-btn" data-value="cog5b_i2v">CogVideoX1.5-5B</button>
-          <button class="selector-btn" data-value="wan14b_i2v">Wan2.2-14B</button>
         </div>
       </div>
 
       <!-- ============ COUNTERFACTUAL GRID ============
-           Files expected: assets/videos/cf_{model}_{variant}.mp4
-           e.g. cf_cosmos_viewpoint.mp4, cf_wan_scene.mp4
+           Files expected: assets/videos/interv_{model}_{variant}.mp4
+           where {variant} is one of: original, view, appearance, scene, object
+           e.g. interv_cosmos3_v2v_view.mp4, interv_minimaxh3_i2v_scene.mp4
            Layout: original (left column) vs. 2×2 variants (right column) -->
       <div class="counterfactual-grid" id="cf-grid" data-template="assets/videos/interv_{model}_{variant}.mp4">
         <!-- Left column: the reference -->
@@ -633,17 +758,20 @@
       <ul class="limitations-list">
         <li>
           <strong>Synthetic-to-real domain gap.</strong> CRONOS uses Unreal Engine renderings; this
-          control is necessary for matched counterfactuals, but introduces a domain gap.
+          control is necessary for matched counterfactuals, but introduces a domain gap. A small-scale
+          experiment with real recordings suggests that failure modes and general trends are shared
+          across data domains.
         </li>
         <li>
-          <strong>Single-reference rollouts.</strong> Most metrics compare against one rendered
-          reference, while the conditioning permits multiple plausible futures. We mitigate this
-          with multi-seed evaluation and reference-independent stability metrics.
+          <strong>Benchmark scope.</strong> CRONOS covers three basic rigid-body interactions. Since even
+          the strongest evaluated model succeeds on only 36% of videos, harder phenomena would add
+          difficulty without making failures easier to diagnose. Natural extensions include further
+          rigid-body events (ramps, stacking, containment) and a non-rigid track.
         </li>
         <li>
-          <strong>Scope of evaluated models.</strong> We evaluate open-source models with reproducible
-          settings, not closed commercial systems (Veo, Sora, Kling). Even so, the benchmark is far
-          from saturated.
+          <strong>Scope of evaluated models.</strong> We evaluate open-source models with fixed weights
+          and reproducible settings, not closed commercial systems (Veo, Sora, Kling), to ensure
+          scientific reproducibility and verifiability by the research community.
         </li>
       </ul>
     </div>
@@ -721,18 +849,21 @@
       var datasets = rows.map(function (row) {
         var color  = row.getAttribute('data-color');
         var values = row.getAttribute('data-metrics').split(',').map(parseFloat);
+        var isI2V  = row.getAttribute('data-mode') === 'i2v';
         return {
           label: row.getAttribute('data-label'),
           data: values,
           borderColor: color,
-          backgroundColor: hexToRgba(color, 0.12),
+          borderDash: isI2V ? [6, 4] : [],
+          backgroundColor: hexToRgba(color, isI2V ? 0.05 : 0.12),
           pointBackgroundColor: color,
           pointBorderColor: '#fff',
           pointBorderWidth: 1.5,
           pointRadius: 3.5,
           pointHoverRadius: 5,
           borderWidth: 2,
-          hidden: false,
+          // Rows marked .is-hidden in the table start hidden in the radar.
+          hidden: row.classList.contains('is-hidden'),
           _rowEl: row
         };
       });
@@ -810,28 +941,66 @@
 
       var interventions = ['View', 'Object', 'Appearance', 'Scene'];
 
-      // Palette matching the paper's Figure 5 — one consistent color per model
+      // Palette matching the paper's sensitivity figure — one consistent color per model
       var palette = {
-        cosmos2b:   '#22c55e',  // light green
-        cosmos14b:  '#15803d',  // dark green
-        magi:       '#1d4ed8',  // blue
-        cogvideox:  '#dc2626',  // red
-        wan:        '#f59e0b'   // orange
+        cosmos2b:   '#37c789',  // light green
+        cosmos14b:  '#248f61',  // mid green
+        cosmos3:    '#125b3c',  // dark green
+        magi:       '#c0571e',  // rust
+        cogvideox:  '#30a8ef',  // blue
+        wan:        '#ffb109',  // amber
+        hunyuan:    '#8362cd',  // purple
+        minimax:    '#fd4848'   // red
       };
 
+      // Values from the paper's sensitivity figure (video-weighted average over events).
+      // Order: View, Object, Appearance, Scene. 1.0 = as much change as resampling the seed.
       var sensitivityData = {
         v2v: [
-          { id: 'cosmos2b',  label: 'Cosmos2.5-2B',    values: [0.35, 0.41, 0.18, 0.37] },
-          { id: 'cosmos14b', label: 'Cosmos2.5-14B',   values: [0.37, 0.40, 0.18, 0.47] },
-          { id: 'magi',      label: 'MAGI-1-4.5B',     values: [0.40, 0.34, 0.22, 0.35] }
+          { id: 'cosmos2b',  label: 'Cosmos2.5-2B',     values: [1.10, 1.18, 0.71, 1.16] },
+          { id: 'cosmos14b', label: 'Cosmos2.5-14B',    values: [1.35, 1.30, 0.76, 1.51] },
+          { id: 'cosmos3',   label: 'Cosmos3-Super',    values: [0.96, 1.04, 0.56, 0.97] },
+          { id: 'magi',      label: 'MAGI-1-4.5B',      values: [1.53, 1.39, 1.03, 1.47] }
         ],
         i2v: [
-          { id: 'cosmos2b',  label: 'Cosmos2.5-2B',    values: [0.37, 0.43, 0.19, 0.45] },
-          { id: 'cosmos14b', label: 'Cosmos2.5-14B',   values: [0.35, 0.41, 0.19, 0.45] },
-          { id: 'magi',      label: 'MAGI-1-4.5B',     values: [0.42, 0.36, 0.22, 0.34] },
-          { id: 'cogvideox', label: 'CogVideoX1.5-5B', values: [0.37, 0.42, 0.24, 0.42] },
-          { id: 'wan',       label: 'Wan2.2-14B',      values: [0.31, 0.16, 0.20, 0.38] }
+          { id: 'cosmos2b',  label: 'Cosmos2.5-2B',     values: [1.43, 1.38, 0.87, 1.43] },
+          { id: 'cosmos14b', label: 'Cosmos2.5-14B',    values: [1.30, 1.37, 0.84, 1.52] },
+          { id: 'cosmos3',   label: 'Cosmos3-Super',    values: [1.12, 1.13, 0.61, 1.08] },
+          { id: 'magi',      label: 'MAGI-1-4.5B',      values: [1.61, 1.40, 1.10, 1.60] },
+          { id: 'cogvideox', label: 'CogVideoX1.5-5B',  values: [1.43, 1.41, 1.13, 1.40] },
+          { id: 'wan',       label: 'Wan2.2-14B',       values: [1.01, 1.18, 0.61, 1.04] },
+          { id: 'hunyuan',   label: 'HunyuanVideo-1.5', values: [1.14, 1.34, 0.79, 1.19] },
+          { id: 'minimax',   label: 'MiniMax-H3',       values: [1.38, 1.04, 0.50, 1.38] }
         ]
+      };
+
+      // Dashed reference line at sensitivity = 1 (change equal to resampling the seed).
+      var seedLine = {
+        id: 'seedLine',
+        afterDatasetsDraw: function (c) {
+          var y = c.scales.y.getPixelForValue(1);
+          var area = c.chartArea, ctx = c.ctx;
+          ctx.save();
+          ctx.strokeStyle = 'rgba(15, 23, 42, 0.45)';
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([6, 4]);
+          ctx.beginPath();
+          ctx.moveTo(area.left, y);
+          ctx.lineTo(area.right, y);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          // Label on a white pill so it stays readable where it crosses a bar.
+          var label = 'seed variation';
+          ctx.font = '500 11px Inter, sans-serif';
+          var w = ctx.measureText(label).width + 10;
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+          ctx.fillRect(area.left + 4, y - 8, w, 16);
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(label, area.left + 9, y);
+          ctx.restore();
+        }
       };
 
       function buildDatasets(mode) {
@@ -852,6 +1021,7 @@
 
       var chart = new Chart(canvas, {
         type: 'bar',
+        plugins: [seedLine],
         data: {
           labels: interventions,
           datasets: buildDatasets('v2v')
@@ -901,7 +1071,7 @@
             },
             y: {
               beginAtZero: true,
-              max: 0.6,
+              max: 1.75,
               title: {
                 display: true,
                 text: 'Sensitivity to Interventions  (lower = better)',
@@ -911,7 +1081,7 @@
               ticks: {
                 color: '#5a6072',
                 font: { family: 'Inter, sans-serif', size: 12 },
-                stepSize: 0.1
+                stepSize: 0.25
               },
               grid: { color: 'rgba(15, 23, 42, 0.06)' }
             }
@@ -1030,7 +1200,7 @@
   <footer class="footer">
     <div class="container narrow">
       <p>
-        Page source available <a href="#">on GitHub</a>.
+        Page source available <a href="https://github.com/GenIntel/CRONOS-project">on GitHub</a>.
       </p>
     </div>
   </footer>
